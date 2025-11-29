@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Iconos Despiértame</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .intro {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .preview {
+            border: 2px solid #ddd;
+            margin: 10px 0;
+            background: url('data:image/svg+xml;utf8,<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="10" height="10" fill="%23eee"/><rect x="10" y="10" width="10" height="10" fill="%23eee"/></svg>');
+            border-radius: 8px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.05);
+        }
+
+        .color-option.active {
+            border-color: #333;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎨 Generador de Iconos - Despiértame</h1>
+    <div class="intro">
+        <p><strong>¡Crea iconos llamativos para tu app!</strong> Selecciona una paleta de colores y descarga todos los
+            assets necesarios.</p>
+    </div>
+
+    <div class="card">
+        <h2>Selecciona Paleta de Colores</h2>
+        <div class="color-picker">
+            <div class="color-option active" onclick="changeColors('blue')"
+                style="background: linear-gradient(135deg, #00D4FF 0%, #9D00FF 100%); color: white;">
+                Azul → Púrpura
+            </div>
+            <div class="color-option" onclick="changeColors('orange')"
+                style="background: linear-gradient(135deg, #FF6B00 0%, #FF0080 100%); color: white;">
+                Naranja → Rosa
+            </div>
+            <div class="color-option" onclick="changeColors('green')"
+                style="background: linear-gradient(135deg, #00FF88 0%, #FFD700 100%); color: #333;">
+                Verde → Amarillo
+            </div>
+            <div class="color-option" onclick="changeColors('red')"
+                style="background: linear-gradient(135deg, #FF3B3B 0%, #FF8E00 100%); color: white;">
+                Rojo → Naranja
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>1. Icono de App (icon.png)</h2>
+        <p>1024x1024px - Reloj despertador con gradiente vibrante</p>
+        <div class="row">
+            <canvas id="iconCanvas" width="1024" height="1024" class="preview"
+                style="width: 200px; height: 200px;"></canvas>
+            <button onclick="download('iconCanvas', 'icon.png')">⬇️ Descargar icon.png</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>2. Icono Adaptativo (adaptive-icon.png)</h2>
+        <p>1024x1024px - Fondo transparente para Android</p>
+        <div class="row">
+            <canvas id="adaptiveCanvas" width="1024" height="1024" class="preview"
+                style="width: 200px; height: 200px;"></canvas>
+            <button onclick="download('adaptiveCanvas', 'adaptive-icon.png')">⬇️ Descargar adaptive-icon.png</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>3. Splash Screen (splash.png)</h2>
+        <p>1284x2778px - Pantalla de inicio</p>
+        <div class="row">
+            <canvas id="splashCanvas" width="1284" height="2778" class="preview"
+                style="width: 150px; height: 324px;"></canvas>
+            <button onclick="download('splashCanvas', 'splash.png')">⬇️ Descargar splash.png</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>4. Favicon (favicon.png)</h2>
+        <p>512x512px - Versión simplificada</p>
+        <div class="row">
+            <canvas id="faviconCanvas" width="512" height="512" class="preview"
+                style="width: 100px; height: 100px;"></canvas>
+            <button onclick="download('faviconCanvas', 'favicon.png')">⬇️ Descargar favicon.png</button>
+        </div>
+    </div>
+
+    <script>
+        let currentColors = {
+            start: '#00D4FF',
+            end: '#9D00FF',
+            white: '#FFFFFF'
+        };
+
+        const colorSchemes = {
+            blue: { start: '#00D4FF', end: '#9D00FF' },
+            orange: { start: '#FF6B00', end: '#FF0080' },
+            green: { start: '#00FF88', end: '#FFD700' },
+            red: { start: '#FF3B3B', end: '#FF8E00' }
+        };
+
+        function changeColors(scheme) {
+            currentColors = { ...colorSchemes[scheme], white: '#FFFFFF' };
+
+            // Update active state
+            document.querySelectorAll('.color-option').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Redraw all canvases
+            redrawAll();
+        }
+
+        function drawAlarmClock(ctx, width, height, transparent = false) {
+            const cx = width / 2;
+            const cy = height / 2;
+            const scale = width / 1024;
+
+            // Background
+            if (!transparent) {
+                const gradient = ctx.createLinearGradient(0, 0, width, height);
+                gradient.addColorStop(0, currentColors.start);
+                gradient.addColorStop(1, currentColors.end);
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+            }
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(scale, scale);
+
+            // Main clock body (circle)
+            ctx.beginPath();
+            ctx.arc(0, 0, 280, 0, Math.PI * 2);
+            ctx.fillStyle = currentColors.white;
+            ctx.fill();
+            ctx.lineWidth = 20;
+            ctx.strokeStyle = currentColors.white;
+            ctx.stroke();
+
+            // Clock face inner circle
+            ctx.beginPath();
+            ctx.arc(0, 0, 240, 0, Math.PI * 2);
+            const faceGradient = ctx.createLinearGradient(-240, -240, 240, 240);
+            faceGradient.addColorStop(0, currentColors.start);
+            faceGradient.addColorStop(1, currentColors.end);
+            ctx.fillStyle = faceGradient;
+            ctx.fill();
+
+            // Clock hands
+            ctx.strokeStyle = currentColors.white;
+            ctx.lineCap = 'round';
+
+            // Hour hand (pointing to 10)
+            ctx.save();
+            ctx.rotate(-Math.PI / 6);
+            ctx.lineWidth = 18;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, -120);
+            ctx.stroke();
+            ctx.restore();
+
+            // Minute hand (pointing to 2)
+            ctx.save();
+            ctx.rotate(Math.PI / 6);
+            ctx.lineWidth = 14;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, -160);
+            ctx.stroke();
+            ctx.restore();
+
+            // Center dot
+            ctx.beginPath();
+            ctx.arc(0, 0, 20, 0, Math.PI * 2);
+            ctx.fillStyle = currentColors.white;
+            ctx.fill();
+
+            // Left bell
+            ctx.save();
+            ctx.translate(-200, -180);
+            drawBell(ctx);
+            ctx.restore();
+
+            // Right bell
+            ctx.save();
+            ctx.translate(200, -180);
+            ctx.scale(-1, 1);
+            drawBell(ctx);
+            ctx.restore();
+
+            // Location pin in center
+            ctx.save();
+            ctx.scale(0.4, 0.4);
+            ctx.translate(0, -50);
+            drawLocationPin(ctx);
+            ctx.restore();
+
+            ctx.restore();
+        }
+
+        function drawBell(ctx) {
+            ctx.fillStyle = currentColors.white;
+            ctx.strokeStyle = currentColors.white;
+            ctx.lineWidth = 12;
+            ctx.lineCap = 'round';
+
+            // Bell body
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(-40, -60, -30, -100);
+            ctx.lineTo(30, -100);
+            ctx.quadraticCurveTo(40, -60, 0, 0);
+            ctx.fill();
+
+            // Bell top
+            ctx.beginPath();
+            ctx.arc(0, -100, 15, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Motion lines
+            ctx.beginPath();
+            ctx.moveTo(-60, -80);
+            ctx.lineTo(-80, -100);
+            ctx.moveTo(-60, -50);
+            ctx.lineTo(-85, -50);
+            ctx.stroke();
+        }
+
+        function drawLocationPin(ctx) {
+            ctx.fillStyle = currentColors.white;
+
+            // Pin shape
+            ctx.beginPath();
+            ctx.moveTo(0, 100);
+            ctx.bezierCurveTo(-100, -30, -120, -180, 0, -180);
+            ctx.bezierCurveTo(120, -180, 100, -30, 0, 100);
+            ctx.fill();
+
+            // Inner circle
+            ctx.beginPath();
+            ctx.arc(0, -80, 40, 0, Math.PI * 2);
+            const pinGradient = ctx.createLinearGradient(-40, -120, 40, -40);
+            pinGradient.addColorStop(0, currentColors.start);
+            pinGradient.addColorStop(1, currentColors.end);
+            ctx.fillStyle = pinGradient;
+            ctx.fill();
+        }
+
+        function drawSplash(ctx, width, height) {
+            // Background
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw icon in center
+            const iconSize = 500;
+            const cx = width / 2;
+            const cy = height / 2 - 200;
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(iconSize / 1024, iconSize / 1024);
+            drawAlarmClock(ctx, 1024, 1024, true);
+            ctx.restore();
+
+            // App name
+            ctx.fillStyle = '#1a1a1a';
+            ctx.font = 'bold 120px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Despiértame', width / 2, cy + 450);
+
+            // Tagline
+            ctx.font = '60px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillStyle = '#666';
+            ctx.fillText('Wake Me Up', width / 2, cy + 550);
+        }
+
+        function redrawAll() {
+            const iconCtx = document.getElementById('iconCanvas').getContext('2d');
+            iconCtx.clearRect(0, 0, 1024, 1024);
+            drawAlarmClock(iconCtx, 1024, 1024);
+
+            const adaptiveCtx = document.getElementById('adaptiveCanvas').getContext('2d');
+            adaptiveCtx.clearRect(0, 0, 1024, 1024);
+            drawAlarmClock(adaptiveCtx, 1024, 1024, true);
+
+            const splashCtx = document.getElementById('splashCanvas').getContext('2d');
+            splashCtx.clearRect(0, 0, 1284, 2778);
+            drawSplash(splashCtx, 1284, 2778);
+
+            const faviconCtx = document.getElementById('faviconCanvas').getContext('2d');
+            faviconCtx.clearRect(0, 0, 512, 512);
+            drawAlarmClock(faviconCtx, 512, 512);
+        }
+
+        function download(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Initial draw
+        redrawAll();
+    </script>
+</body>
+
+</html>
