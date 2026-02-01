@@ -2,8 +2,8 @@ import 'dotenv/config';
 
 export default {
     expo: {
-        name: "Despiértame",
-        slug: "despiertame",
+        name: "ProxiAlert",
+        slug: "despiertame", // Keep old slug for EAS compatibility
         version: "1.0.0",
         orientation: "portrait",
         icon: "./assets/icon.png",
@@ -18,7 +18,7 @@ export default {
         ],
         ios: {
             supportsTablet: true,
-            bundleIdentifier: "com.antigravity.despiertame",
+            bundleIdentifier: "com.antigravity.proxialert",
             infoPlist: {
                 NSLocationWhenInUseUsageDescription: "Necesitamos tu ubicación para avisarte cuando llegues a tu destino.",
                 NSLocationAlwaysUsageDescription: "Necesitamos tu ubicación para avisarte cuando llegues a tu destino incluso si la app está en segundo plano.",
@@ -30,7 +30,7 @@ export default {
                 foregroundImage: "./assets/adaptive-icon.png",
                 backgroundColor: "#ffffff"
             },
-            package: "com.antigravity.despiertame",
+            package: "com.antigravity.proxialert",
             permissions: [
                 "ACCESS_COARSE_LOCATION",
                 "ACCESS_FINE_LOCATION",
@@ -45,6 +45,21 @@ export default {
                 }
             }
         },
+        plugins: [
+            [
+                "expo-location",
+                {
+                    "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+                }
+            ],
+            [
+                "react-native-google-mobile-ads",
+                {
+                    "androidAppId": "ca-app-pub-5025716288565530~9228828128",
+                    "iosAppId": "ca-app-pub-5025716288565530~3843891170"
+                }
+            ]
+        ],
         web: {
             favicon: "./assets/favicon.png"
         },

@@ -1,13 +1,23 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Dimensions, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Dimensions, ScrollView, ActivityIndicator } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useAppStore } from '../store/useAppStore';
 import { COLORS, RADIUS, SHADOWS, SPACING, FONT_SIZES } from '../constants/theme';
 import { formatDistance, calculateEstimatedTime } from '../utils/distance';
 import i18n from '../i18n';
-import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
+import { RewardedAd, RewardedAdEventType, AdEventType, TestIds } from 'react-native-google-mobile-ads';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+// Production Rewarded Ad Unit IDs
+const rewardedAdUnitId = __DEV__
+    ? TestIds.REWARDED
+    : 'ca-app-pub-5025716288565530/7360645497'; // Rewarded Ad Unit ID from AdMob
+
+// Create rewarded ad instance
+const rewardedAd = RewardedAd.createForAdRequest(rewardedAdUnitId, {
+    requestNonPersonalizedAdsOnly: true,
+});
 
 export const InfoPanel = () => {
     const {
@@ -28,9 +38,8 @@ export const InfoPanel = () => {
         unlockTripWithAd,
     } = useAppStore();
 
-    const [showAdModal, setShowAdModal] = React.useState(false);
-    const videoRef = React.useRef<Video>(null);
-    const [videoStatus, setVideoStatus] = React.useState<AVPlaybackStatus | null>(null);
+    const [isAdLoading, setIsAdLoading] = React.useState(false);
+    const [adLoaded, setAdLoaded] = React.useState(false);
 
     // Panel persistente: Si no hay destino, mostrar estado vacío o placeholder
     const hasDestination = !!destination;
@@ -42,6 +51,54 @@ export const InfoPanel = () => {
 
     const canStart = hasDestination && (isPremium || !limitReached) && (!needsToWatchAd || isRewardAdWatched);
 
+    // Load rewarded ad on mount and after each use
+    React.useEffect(() => {
+        const unsubscribeLoaded = rewardedAd.addAdEventListener(RewardedAdEventType.LOADED, () => {
+            console.log('✅ [AD] Rewarded ad loaded');
+            setAdLoaded(true);
+            setIsAdLoading(false);
+        });
+
+        const unsubscribeEarned = rewardedAd.addAdEventListener(
+            RewardedAdEventType.EARNED_REWARD,
+            reward => {
+                console.log('💰 [AD] Rewarded ad earned reward:', reward);
+                unlockTripWithAd();
+                alert('¡Recompensa obtenida! Viaje desbloqueado.');
+            },
+        );
+
+        const unsubscribeClosed = rewardedAd.addAdEventListener(AdEventType.CLOSED, () => {
+            console.log('🔄 [AD] Rewarded ad closed, loading next ad');
+            setAdLoaded(false);
+            setIsAdLoading(true);
+            rewardedAd.load();
+        });
+
+        const unsubscribeError = rewardedAd.addAdEventListener(AdEventType.ERROR, (error) => {
+            console.error('❌ [AD] Rewarded ad error:', error);
+            setIsAdLoading(false);
+            setAdLoaded(false);
+            // Retry loading after 5 seconds
+            setTimeout(() => {
+                console.log('🔄 [AD] Retrying rewarded ad load...');
+                setIsAdLoading(true);
+                rewardedAd.load();
+            }, 5000);
+        });
+
+        // Start loading the first ad
+        setIsAdLoading(true);
+        rewardedAd.load();
+
+        return () => {
+            unsubscribeLoaded();
+            unsubscribeEarned();
+            unsubscribeClosed();
+            unsubscribeError();
+        };
+    }, []);
+
     const handleMainButtonPress = () => {
         if (isTracking) {
             setIsTracking(false);
@@ -49,7 +106,11 @@ export const InfoPanel = () => {
         }
 
         if (needsToWatchAd) {
-            setShowAdModal(true);
+            if (adLoaded) {
+                rewardedAd.show();
+            } else {
+                alert('Cargando anuncio... Por favor espera un momento.');
+            }
             return;
         }
 
@@ -58,21 +119,7 @@ export const InfoPanel = () => {
         }
     };
 
-    // Calcular tiempo restante para el UI
-    const getRemainingTime = () => {
-        if (videoStatus && videoStatus.isLoaded && videoStatus.durationMillis && videoStatus.positionMillis) {
-            const remaining = Math.ceil((videoStatus.durationMillis - videoStatus.positionMillis) / 1000);
-            return remaining > 0 ? remaining : 0;
-        }
-        return 15; // Default estimado
-    };
 
-    const getProgress = () => {
-        if (videoStatus && videoStatus.isLoaded && videoStatus.durationMillis && videoStatus.positionMillis) {
-            return videoStatus.positionMillis / videoStatus.durationMillis;
-        }
-        return 0;
-    };
 
     return (
         <>
@@ -134,15 +181,20 @@ export const InfoPanel = () => {
                     onPress={handleMainButtonPress}
                     disabled={!isTracking && !canStart && !needsToWatchAd}
                 >
-                    <Text style={styles.actionBtnText}>
-                        {isTracking
-                            ? 'DETENER ALERTA'
-                            : limitReached
-                                ? 'LÍMITE DIARIO ALCANZADO'
-                                : needsToWatchAd
-                                    ? 'VER VIDEO PARA DESBLOQUEAR'
-                                    : 'INICIAR ALERTA'}
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        {needsToWatchAd && isAdLoading && (
+                            <ActivityIndicator color="white" size="small" style={{ marginRight: 8 }} />
+                        )}
+                        <Text style={styles.actionBtnText}>
+                            {isTracking
+                                ? 'DETENER ALERTA'
+                                : limitReached
+                                    ? 'LÍMITE DIARIO ALCANZADO'
+                                    : needsToWatchAd
+                                        ? (isAdLoading ? 'CARGANDO ANUNCIO...' : 'VER ANUNCIO PARA DESBLOQUEAR')
+                                        : 'INICIAR ALERTA'}
+                        </Text>
+                    </View>
                 </TouchableOpacity >
 
                 {/* Usos Counter (Minimal) */}
@@ -168,46 +220,6 @@ export const InfoPanel = () => {
                         <TouchableOpacity style={styles.stopAlarmBtn} onPress={stopAlarm}>
                             <Text style={styles.stopAlarmText}>{i18n.t('stopAlarmBtn')}</Text>
                         </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal >
-
-            {/* Real Reward Ad Video Modal */}
-            < Modal visible={showAdModal} animationType="slide" onRequestClose={() => { }}>
-                <View style={styles.videoContainer}>
-                    <Video
-                        ref={videoRef}
-                        style={styles.video}
-                        source={{
-                            uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-                        }}
-                        useNativeControls={false}
-                        resizeMode={ResizeMode.COVER}
-                        isLooping={false}
-                        shouldPlay={showAdModal}
-                        onPlaybackStatusUpdate={status => {
-                            setVideoStatus(status);
-                            if (status.isLoaded && status.didJustFinish) {
-                                setShowAdModal(false);
-                                unlockTripWithAd();
-                                setDestination(null); // Clear destination after watching ad
-                                alert("¡Recompensa obtenida! Viaje desbloqueado.");
-                            }
-                        }}
-                    />
-
-                    {/* Overlay UI */}
-                    <View style={styles.videoOverlay}>
-                        <View style={styles.timerContainer}>
-                            <Text style={styles.timerText}>
-                                Recompensa en {getRemainingTime()}s
-                            </Text>
-                        </View>
-
-                        {/* Progress Bar */}
-                        <View style={styles.progressBarContainer}>
-                            <View style={[styles.progressBarFill, { width: `${getProgress() * 100}%` }]} />
-                        </View>
                     </View>
                 </View>
             </Modal >
@@ -377,42 +389,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     adBtn: {
-        backgroundColor: '#F5A623',
-    },
-    // Video Modal Styles
-    videoContainer: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'black',
-    },
-    video: {
-        ...StyleSheet.absoluteFillObject,
-    },
-    videoOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        justifyContent: 'space-between',
-        padding: 20,
-        paddingTop: 50,
-    },
-    timerContainer: {
-        alignSelf: 'flex-end',
-        backgroundColor: 'rgba(0,0,0,0.6)',
-        padding: 10,
-        borderRadius: 20,
-    },
-    timerText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 14,
-    },
-    progressBarContainer: {
-        height: 6,
-        backgroundColor: 'rgba(255,255,255,0.3)',
-        borderRadius: 3,
-        overflow: 'hidden',
-        marginBottom: 20,
-    },
-    progressBarFill: {
-        height: '100%',
         backgroundColor: '#F5A623',
     },
 });

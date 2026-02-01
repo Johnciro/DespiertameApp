@@ -33,6 +33,8 @@ export const setupNotifications = async () => {
             enableVibrate: true,
             enableLights: true,
             lightColor: '#FF0000',
+            lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+            bypassDnd: true, // Bypass Do Not Disturb
         });
     }
 
@@ -40,11 +42,12 @@ export const setupNotifications = async () => {
 };
 
 /**
- * Envía una notificación de alarma de alta prioridad
+ * Envía una notificación de alarma de alta prioridad que trae la app al frente
  */
 export const sendAlarmNotification = async (message: string, title: string = '¡LLEGASTE!') => {
     try {
         await Notifications.scheduleNotificationAsync({
+            identifier: 'alarm_notification', // Fixed ID to prevent stacking
             content: {
                 title,
                 body: message,
@@ -52,9 +55,13 @@ export const sendAlarmNotification = async (message: string, title: string = '¡
                 priority: Notifications.AndroidNotificationPriority.MAX,
                 vibrate: [0, 500, 200, 500, 200, 500, 200, 500],
                 data: { type: 'alarm' },
+                autoDismiss: false, // Don't auto-dismiss
+                sticky: true, // Keep notification visible
+                categoryIdentifier: 'alarm', // For iOS actions
             },
             trigger: null, // Inmediato
         });
+        console.log('🔔 [NOTIFICATION SENT] Alarm notification dispatched');
     } catch (error) {
         console.error('Error sending alarm notification:', error);
     }

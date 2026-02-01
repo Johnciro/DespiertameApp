@@ -16,9 +16,10 @@ export const useAppStore = create<AppState>()(
             // Freemium State
             isPremium: false,
             dailyTripsCount: 0,
-            maxDailyTrips: 200, // Límite aumentado para pruebas
+            maxDailyTrips: 200,
             lastResetDate: new Date().toDateString(),
             isRewardAdWatched: false,
+            favorites: [],
 
             setDestination: (destination) => set({ destination: destination ? { ...destination } : null }),
             setCurrentLocation: (location) => set({ currentLocation: location }),
@@ -26,11 +27,8 @@ export const useAppStore = create<AppState>()(
 
             setIsTracking: (isTracking) => {
                 const state = get();
-                // Si activamos tracking y NO es premium
                 if (isTracking && !state.isTracking && !state.isPremium) {
                     const today = new Date().toDateString();
-
-                    // Reset diario
                     if (today !== state.lastResetDate) {
                         set({
                             dailyTripsCount: 1,
@@ -40,24 +38,19 @@ export const useAppStore = create<AppState>()(
                         });
                         return;
                     }
-
-                    // Primer viaje del día es GRATIS (dailyTripsCount es 0 antes de empezar)
                     if (state.dailyTripsCount === 0) {
                         set({ dailyTripsCount: 1, isTracking: true });
                         return;
                     }
-
-                    // Siguientes viajes requieren ver video
                     if (state.isRewardAdWatched) {
                         if (state.dailyTripsCount < state.maxDailyTrips) {
                             set({
                                 dailyTripsCount: state.dailyTripsCount + 1,
                                 isTracking: true,
-                                isRewardAdWatched: false // Consumir el video visto
+                                isRewardAdWatched: false
                             });
                         }
                     } else {
-                        // No ha visto el video (esto debería prevenirse en UI)
                         return;
                     }
                 } else {
@@ -80,10 +73,55 @@ export const useAppStore = create<AppState>()(
                     return true;
                 }
                 return state.isPremium || state.dailyTripsCount < state.maxDailyTrips;
+            },
+
+            // Favorites Actions
+            addFavorite: (destination) => {
+                const state = get();
+                // Limit to 3 for free users (Profitability Check)
+                if (!state.isPremium && state.favorites.length >= 3) {
+                    return false; // Limit reached
+                }
+                // Check if already exists
+                if (state.favorites.some(fav => fav.name === destination.name)) {
+                    return true; // Already saved
+                }
+
+                const newFavorite = {
+                    ...destination,
+                    createdAt: Date.now(), // Timestamp for 30-day lock
+                };
+
+                set({ favorites: [...state.favorites, newFavorite] });
+                return true;
+            },
+            removeFavorite: (name) => {
+                const state = get();
+                const favorite = state.favorites.find(fav => fav.name === name);
+
+                if (favorite && !state.isPremium) {
+                    const now = Date.now();
+                    const createdAt = favorite.createdAt || 0;
+                    const daysSinceCreation = (now - createdAt) / (1000 * 60 * 60 * 24);
+
+                    if (daysSinceCreation < 30) {
+                        // Locked
+                        // We can't return a value here easily without changing interface, 
+                        // but we can just NOT remove it. 
+                        // The UI should check this before calling or handle the state update.
+                        // Ideally we throw or return false, but let's just ignore for now 
+                        // and handle the check in UI/Component for better UX feedback.
+                        // actually, let's just not remove it.
+                        console.warn('Favorite is locked');
+                        return;
+                    }
+                }
+
+                set({ favorites: state.favorites.filter(fav => fav.name !== name) });
             }
         }),
         {
-            name: 'despiertame-storage',
+            name: 'proxialert-storage',
             storage: createJSONStorage(() => AsyncStorage),
             partialize: (state) => ({
                 destination: state.destination,
@@ -93,6 +131,7 @@ export const useAppStore = create<AppState>()(
                 isPremium: state.isPremium,
                 dailyTripsCount: state.dailyTripsCount,
                 lastResetDate: state.lastResetDate,
+                favorites: state.favorites,
             }),
         }
     )

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { View, StyleSheet, Keyboard, TouchableOpacity, Text, Dimensions } from 'react-native';
 import { GooglePlacesAutocomplete, GooglePlacesAutocompleteRef } from 'react-native-google-places-autocomplete';
 import Constants from 'expo-constants';
@@ -13,7 +13,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 export const DestinationSearch = () => {
     const setDestination = useAppStore((state) => state.setDestination);
     const destination = useAppStore((state) => state.destination);
-    const isTracking = useAppStore((state) => state.isTracking);
+    const favorites = useAppStore((state) => state.favorites);
     const ref = useRef<GooglePlacesAutocompleteRef>(null);
     const [searchKey, setSearchKey] = React.useState(0);
 
@@ -34,6 +34,7 @@ export const DestinationSearch = () => {
                 key={searchKey} // Clave para forzar re-render
                 placeholder={i18n.t('searchPlaceholder')}
                 onPress={(data, details = null) => {
+                    // Handle Google Places Results
                     if (details) {
                         const { lat, lng } = details.geometry.location;
                         const newDestination = {
@@ -41,8 +42,6 @@ export const DestinationSearch = () => {
                             location: { latitude: lat, longitude: lng },
                         };
                         setDestination(newDestination);
-                        // Confirmación visual temporal para el usuario
-                        // alert(`Destino actualizado a:\n${data.description}`);
                     } else {
                         alert('Error: No details');
                     }
@@ -59,15 +58,7 @@ export const DestinationSearch = () => {
                         zIndex: 999,
                     },
                     textInput: styles.textInput,
-                    listView: {
-                        backgroundColor: COLORS.white,
-                        borderRadius: RADIUS.m,
-                        marginTop: SPACING.s,
-                        ...SHADOWS.default,
-                        maxHeight: 250,
-                        elevation: 10,
-                        zIndex: 1000,
-                    },
+                    listView: styles.listView,
                     row: styles.row,
                     description: styles.description,
                 }}
@@ -81,17 +72,14 @@ export const DestinationSearch = () => {
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        top: 10, // Relativo al contenedor, que ya está debajo del banner
+        top: 10,
         left: SPACING.m,
-        right: SPACING.m,
+        right: SPACING.m + 50, // Leave space for hamburger menu (40px button + 10px gap)
         zIndex: 10,
-        maxWidth: SCREEN_WIDTH - (SPACING.m * 2),
-    },
-    autocompleteContainer: {
-        flex: 0,
+        maxWidth: SCREEN_WIDTH - (SPACING.m * 2) - 50,
     },
     textInput: {
-        height: 44, // Matched to destination field
+        height: 44,
         borderRadius: RADIUS.l,
         paddingHorizontal: 12,
         paddingRight: 40,
@@ -106,36 +94,19 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.m,
         marginTop: SPACING.s,
         ...SHADOWS.default,
-        maxHeight: 250, // Más alto para ver más opciones
+        maxHeight: 250,
+        elevation: 10,
+        zIndex: 1000,
     },
     row: {
-        paddingVertical: SPACING.m + 2, // Más espacio entre opciones
+        paddingVertical: SPACING.m + 2,
         paddingHorizontal: SPACING.m,
         borderBottomWidth: 1,
         borderBottomColor: '#f0f0f0',
     },
     description: {
-        fontSize: 16, // Texto más grande en resultados
+        fontSize: 16,
         color: COLORS.text,
-        lineHeight: 22,
-    },
-    clearButton: {
-        position: 'absolute',
-        right: 12,
-        top: 12,
-        width: 36, // Botón más grande
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: COLORS.primary,
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 20,
-        ...SHADOWS.default,
-    },
-    clearButtonText: {
-        color: COLORS.white,
-        fontSize: 22, // X más grande
-        fontWeight: '700',
         lineHeight: 22,
     },
 });

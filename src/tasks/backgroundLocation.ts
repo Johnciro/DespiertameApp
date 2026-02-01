@@ -34,7 +34,7 @@ export const registerBackgroundTask = () => {
                 if (!location) return;
 
                 try {
-                    const storageItem = await AsyncStorage.getItem('despiertame-storage');
+                    const storageItem = await AsyncStorage.getItem('proxialert-storage');
                     if (!storageItem) return;
 
                     const { state } = JSON.parse(storageItem);
@@ -62,7 +62,7 @@ export const registerBackgroundTask = () => {
                                 isAlarmActive: true,
                             }
                         };
-                        await AsyncStorage.setItem('despiertame-storage', JSON.stringify(updatedState));
+                        await AsyncStorage.setItem('proxialert-storage', JSON.stringify(updatedState));
 
                         // Enviar notificación de alta prioridad
                         await sendAlarmNotification(

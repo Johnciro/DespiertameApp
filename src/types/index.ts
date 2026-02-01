@@ -1,3 +1,5 @@
+import { LocationObject } from 'expo-location';
+
 export interface Coordinates {
     latitude: number;
     longitude: number;
@@ -6,6 +8,7 @@ export interface Coordinates {
 export interface Destination {
     name: string;
     location: Coordinates;
+    createdAt?: number;
 }
 
 export interface AppState {
@@ -22,6 +25,7 @@ export interface AppState {
     maxDailyTrips: number;
     lastResetDate: string;
     isRewardAdWatched: boolean;
+    favorites: Destination[];
 
     setDestination: (destination: Destination | null) => void;
     setCurrentLocation: (location: LocationObject) => void;
@@ -35,4 +39,8 @@ export interface AppState {
     setPremiumStatus: (isPremium: boolean) => void;
     unlockTripWithAd: () => void;
     checkDailyLimit: () => boolean;
+
+    // Favorites Actions
+    addFavorite: (destination: Destination) => boolean;
+    removeFavorite: (name: string) => void;
 }

@@ -2,30 +2,34 @@
 
 Aplicación móvil inteligente para viajeros que te despierta cuando estás llegando a tu destino. Ideal para no pasarte de parada en el transporte público.
 
-## 📱 Características
+## 📱 Características Principales
 
 - **Búsqueda Inteligente**: Integración con Google Places para encontrar cualquier destino.
 - **Mapa Interactivo**: Visualización clara de tu ubicación y destino usando Google Maps.
 - **Tracking en Tiempo Real**: Monitoreo constante de tu posición.
 - **Multilingüe**: Soporte automático para Español, Portugués e Inglés (UI y Voz).
 - **Modo Segundo Plano**: Funciona incluso con la pantalla apagada o usando otras apps.
-- **Alarma por Voz**: La app te hablará diciendo "Se acerca a su destino" (en tu idioma) repetidamente.
-- **Vibración Continua**: Patrón de vibración intenso para asegurar el despertar.
-- **Alarma Personalizable**: Configura el radio de alerta (200m, 500m, 1km).
+- **Alarma Continua e Ininterrumpida**:
+  - **Voz**: La app te hablará repetidamente hasta que despiertes.
+  - **Vibración**: Patrón de vibración intenso e infinito.
+  - **Notificaciones de Alta Prioridad**: Despiertan el dispositivo incluso si está en reposo.
+- **Modelo Freemium**: 
+  - 1 viaje diario gratis.
+  - Viajes adicionales desbloqueables viendo anuncios (simulados).
+  - Opción Premium para viajes ilimitados.
 
 ## 🛠 Requisitos Técnicos
 
 - Node.js (v16 o superior)
 - npm o yarn
 - Expo CLI
-- Dispositivo físico (iOS/Android) o Simulador
+- Dispositivo físico (Android recomendado para pruebas de background)
 - **Google Maps API Key** (con Maps SDK for Android/iOS y Places API habilitados)
 
 ## 🚀 Instalación
 
 1. **Clonar el repositorio** (o descargar los archivos):
    ```bash
-   # Si estás en la carpeta del proyecto
    npm install
    ```
 
@@ -40,27 +44,44 @@ Aplicación móvil inteligente para viajeros que te despierta cuando estás lleg
    GOOGLE_PLACES_API_KEY=tu_clave_aqui
    ```
 
-3. **Añadir Sonido de Alarma**:
-   Coloca un archivo de audio real en `assets/alarm.mp3`. El archivo actual es solo un placeholder de texto.
+## 📦 Construcción del APK
 
-## 🏃‍♂️ Ejecución
+Para generar el archivo instalable (APK) para Android:
 
-### Android
+1. Sigue las instrucciones detalladas en [INSTRUCCIONES_BUILD_APK.md](./INSTRUCCIONES_BUILD_APK.md).
+2. Comando rápido (si ya tienes EAS configurado):
+   ```bash
+   npx eas-cli build --profile preview --platform android
+   ```
+
+## 🎨 Generación de Iconos
+
+Hemos incluido una herramienta para generar iconos personalizados y llamativos:
+
+1. Abre el generador en tu navegador:
+   ```bash
+   open assets/generator.html
+   ```
+2. Selecciona tu paleta de colores favorita.
+3. Descarga los assets y reemplázalos en la carpeta `assets/`.
+4. Consulta [INSTRUCCIONES_ICONOS.md](./INSTRUCCIONES_ICONOS.md) para más detalles.
+
+## 🏃‍♂️ Ejecución en Desarrollo
+
 ```bash
-npm run android
-```
+# Iniciar servidor de desarrollo
+npm start
 
-### iOS
-```bash
-npm run ios
+# Presiona 'a' para abrir en Android
+# Presiona 'i' para abrir en iOS
 ```
 
 ## 🔐 Permisos
 
-La aplicación solicitará permisos de ubicación:
-- **"Al usar la app"**: Para mostrar tu ubicación en el mapa.
-- **"Siempre"**: CRÍTICO para que la alarma funcione con la pantalla apagada. Debes seleccionar "Permitir siempre" cuando se solicite o cambiarlo en Configuración.
-- **Notificaciones**: Para mantener el servicio en segundo plano activo (Android).
+La aplicación solicitará permisos críticos:
+- **Ubicación "Siempre"**: NECESARIO para que la alarma funcione en background.
+- **Notificaciones**: NECESARIO para despertar el dispositivo cuando llegues.
+- **Superposición**: Para mostrar alertas sobre otras apps (opcional según versión de Android).
 
 ## 🏗 Estructura del Proyecto
 
@@ -71,20 +92,20 @@ La aplicación solicitará permisos de ubicación:
   /hooks        # Lógica de negocio (Location Tracker)
   /screens      # Pantallas (HomeScreen)
   /store        # Estado global (Zustand)
-  /utils        # Funciones auxiliares (Cálculo distancia)
+  /tasks        # Tareas en segundo plano (Background Location)
+  /utils        # Funciones auxiliares (Notificaciones, Distancia)
 App.tsx         # Entry point
 app.config.ts   # Configuración de Expo
 ```
 
-## 📝 Notas de Desarrollo
+## ⚠️ Solución de Problemas
 
-- **Arquitectura**: Se usó una arquitectura modular basada en características y capas (UI, State, Logic).
-- **Estado**: Gestionado con `zustand` por su simplicidad y rendimiento.
-- **Mapas**: `react-native-maps` para renderizado nativo de mapas.
-- **Geolocalización**: `expo-location` con `watchPositionAsync` para un balance entre precisión y batería.
+- **La alarma no suena en background**: 
+  - Asegúrate de haber otorgado permiso de ubicación "Siempre".
+  - Verifica que no tengas activado el "Ahorro de batería" estricto para esta app.
+- **El mapa no carga**: Verifica tus API Keys de Google.
+- **Crash al iniciar**: Revisa los logs con `adb logcat`. Hemos agregado manejo de errores robusto para diagnosticar problemas.
 
-## ⚠️ Solución de Problemas Comunes
+## 📄 Licencia
 
-- **El mapa no carga**: Verifica que tu API Key de Google tenga habilitado "Maps SDK for Android" y "Maps SDK for iOS".
-- **La búsqueda no funciona**: Verifica que tu API Key tenga habilitado "Places API".
-- **Error de facturación**: Asegúrate de que tu cuenta de Google Cloud tenga una cuenta de facturación asociada (requisito de Google).
+Este proyecto es software propietario. Todos los derechos reservados.
