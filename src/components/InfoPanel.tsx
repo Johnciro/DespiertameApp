@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Dimensions, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Dimensions, ScrollView, ActivityIndicator, Share } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useAppStore } from '../store/useAppStore';
 import { COLORS, RADIUS, SHADOWS, SPACING, FONT_SIZES } from '../constants/theme';
@@ -132,33 +132,74 @@ export const InfoPanel = () => {
         }
     };
 
+    const handleShareTrip = async () => {
+        if (!destination) return;
+
+        try {
+            // Calcular ETA aproximado si tenemos distancia (asumiendo 30km/h velocidad promedio bus)
+            let etaText = '';
+            // No tenemos la velocidad real aquí, pero podemos estimar algo genérico o solo enviar destino.
+            // Para MVP solo enviamos destino.
+
+            const message = `🚌 Voy camino a: *${destination.name}* usando ProxiAlert. \n\n📍 Te avisaré cuando llegue. \n\nDescarga la App aquí: https://play.google.com/store/apps/details?id=com.antigravity.proxialert`;
+
+            const result = await Share.share({
+                message: message,
+            });
+
+            if (result.action === Share.sharedAction) {
+                if (result.activityType) {
+                    // shared with activity type of result.activityType
+                } else {
+                    // shared
+                }
+            } else if (result.action === Share.dismissedAction) {
+                // dismissed
+            }
+        } catch (error: any) {
+            alert(error.message);
+        }
+    };
+
     return (
         <>
             <View style={styles.container}>
                 {/* Header / Destino */}
-                <TouchableOpacity
-                    style={styles.headerRow}
-                    onLongPress={() => {
-                        // Secret Debug Toggle
-                        setPremiumStatus(!isPremium);
-                        alert(`Modo ${!isPremium ? 'PREMIUM' : 'FREE'} activado`);
-                    }}
-                    activeOpacity={1}
-                >
-                    <Text style={styles.headerLabel}>
-                        {hasDestination ? 'Destino Seleccionado' : 'Sin destino'}
-                    </Text>
-                    <View style={{ width: '100%' }}>
-                        <Text
-                            style={styles.destinationText}
-                            numberOfLines={1}
-                            ellipsizeMode="tail"
-                            key={hasDestination ? destination.name : 'empty'}
-                        >
-                            {hasDestination ? destination.name : 'Seleccione un destino en el mapa'}
+                <View style={styles.headerRowContainer}>
+                    <TouchableOpacity
+                        style={styles.headerRow}
+                        onLongPress={() => {
+                            // Secret Debug Toggle
+                            setPremiumStatus(!isPremium);
+                            alert(`Modo ${!isPremium ? 'PREMIUM' : 'FREE'} activado`);
+                        }}
+                        activeOpacity={1}
+                    >
+                        <Text style={styles.headerLabel}>
+                            {hasDestination ? 'Destino Seleccionado' : 'Sin destino'}
                         </Text>
-                    </View>
-                </TouchableOpacity>
+                        <View style={{ width: '100%' }}>
+                            <Text
+                                style={styles.destinationText}
+                                numberOfLines={1}
+                                ellipsizeMode="tail"
+                                key={hasDestination ? destination.name : 'empty'}
+                            >
+                                {hasDestination ? destination.name : 'Seleccione un destino en el mapa'}
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+
+                    {/* Share Button (Only if destination selected) */}
+                    {hasDestination && (
+                        <TouchableOpacity
+                            style={styles.shareButton}
+                            onPress={handleShareTrip}
+                        >
+                            <Text style={{ fontSize: 20 }}>📤</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
 
                 {/* Slider Minimalista */}
                 <View style={styles.sliderContainer}>
@@ -254,11 +295,26 @@ const styles = StyleSheet.create({
         height: 'auto',
         maxHeight: '42%', // Slightly more room since map will be constrained
     },
+    headerRowContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 6,
+    },
     headerRow: {
+        flex: 1, // Take available space
         backgroundColor: COLORS.white,
         padding: 8,
         borderRadius: RADIUS.m,
-        marginBottom: 6,
+        marginRight: 8, // Space for share button
+        ...SHADOWS.default,
+    },
+    shareButton: {
+        backgroundColor: COLORS.white,
+        width: 44,
+        height: 44,
+        borderRadius: RADIUS.m,
+        alignItems: 'center',
+        justifyContent: 'center',
         ...SHADOWS.default,
     },
     headerLabel: {
