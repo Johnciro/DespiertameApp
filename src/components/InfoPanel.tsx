@@ -6,6 +6,7 @@ import { COLORS, RADIUS, SHADOWS, SPACING, FONT_SIZES } from '../constants/theme
 import { formatDistance, calculateEstimatedTime } from '../utils/distance';
 import i18n from '../i18n';
 import { RewardedAd, RewardedAdEventType, AdEventType, TestIds } from 'react-native-google-mobile-ads';
+import { useInterstitialAd } from '../hooks/useInterstitialAd';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -40,6 +41,9 @@ export const InfoPanel = () => {
 
     const [isAdLoading, setIsAdLoading] = React.useState(false);
     const [adLoaded, setAdLoaded] = React.useState(false);
+
+    // Interstitial Ad for Stop Alarm
+    const { showInterstitial, isLoaded: interstitialLoaded } = useInterstitialAd();
 
     // Panel persistente: Si no hay destino, mostrar estado vacío o placeholder
     const hasDestination = !!destination;
@@ -119,7 +123,14 @@ export const InfoPanel = () => {
         }
     };
 
-
+    const handleStopAlarm = () => {
+        stopAlarm();
+        // Show Interstitial if NOT Premium
+        if (!isPremium && interstitialLoaded) {
+            console.log('🎬 [AD] Showing Interstitial after alarm stop');
+            showInterstitial();
+        }
+    };
 
     return (
         <>
@@ -217,7 +228,7 @@ export const InfoPanel = () => {
                         <Text style={styles.alarmMessage}>
                             {hasDestination ? i18n.t('alarmMessage', { destination: destination.name }) : ''}
                         </Text>
-                        <TouchableOpacity style={styles.stopAlarmBtn} onPress={stopAlarm}>
+                        <TouchableOpacity style={styles.stopAlarmBtn} onPress={handleStopAlarm}>
                             <Text style={styles.stopAlarmText}>{i18n.t('stopAlarmBtn')}</Text>
                         </TouchableOpacity>
                     </View>

@@ -1,48 +1,36 @@
-# Cómo Construir el APK Corregido
+# Cómo Generar y Probar tu APK
 
-## Opción 1: Build en la Nube (Recomendado)
+> [!IMPORTANT]
+> **RECOMENDACIÓN:** Usa la **Construcción en la Nube (Cloud Build)**. Es más lenta (tarda unos minutos en cola) pero **infalible** porque no depende de que tengas Java/Android Studio instalados en tu Mac.
 
-```bash
-cd /Users/usuario/Developer/Despiertame
-npx eas-cli build --profile preview --platform android
-```
+## 1. Generar APK de PRUEBA (Opción Recomendada: NUBE)
 
-Esto construirá el APK en los servidores de Expo y te dará un link para descargarlo cuando termine.
-
-## Opción 2: Build Local (Requiere Docker)
+Ejecuta esto en tu terminal y espera a que termine. Te dará un link de descarga (QR) al final.
 
 ```bash
-cd /Users/usuario/Developer/Despiertame
-npx eas-cli build --profile preview --platform android --local
+eas build -p android --profile preview
 ```
 
-## Después de Construir
+## 2. Opción Local (Solo si tienes Android Studio y Java configurados)
+*El error que viste (`Unable to locate a Java Runtime`) significa que tu Mac no tiene Java configurado correctamente. Por eso falló.*
 
-### Instalar el APK
+Si arreglas Java, puedes usar:
 ```bash
-# Conecta tu dispositivo Android
-adb devices
-
-# Instala el APK
-adb install ruta/al/archivo.apk
+eas build -p android --profile preview --local
 ```
 
-### Verificar que Funciona
+## 3. Generar AAB de PRODUCCIÓN (Para subir a Play Store)
+
+Cuando todo esté probado y listo:
+
 ```bash
-# Limpiar logs anteriores
-adb logcat -c
-
-# Monitorear logs mientras abres la app
-adb logcat | grep -i "despiertame\|ReactNative\|FATAL\|AndroidRuntime"
+eas build -p android --profile production
 ```
 
-## Qué Esperar
+## 4. Precios Confirmados (México)
+*   **Mensual:** ~$99 MXN ($4.99 USD)
+*   **Anual:** ~$799 MXN ($39.99 USD)
 
-1. ✅ La app debería abrir inmediatamente
-2. ✅ Debería pedir permisos de ubicación
-3. ✅ El mapa debería mostrarse con tu ubicación actual
-4. ✅ Deberías poder buscar destinos y activar el tracking
-
-## Si Hay Problemas
-
-Los logs ahora mostrarán errores específicos gracias al manejo de errores que agregamos. Comparte los logs conmigo y podré ayudarte a diagnosticar cualquier problema restante.
+---
+**Recursos Generados:**
+Ya tienes los iconos y gráficos en la carpeta de artefactos.

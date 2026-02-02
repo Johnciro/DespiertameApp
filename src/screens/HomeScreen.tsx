@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, StatusBar, SafeAreaView } from 'react-native';
 import { MapDisplay } from '../components/MapDisplay';
 import { DestinationSearch } from '../components/DestinationSearch';
@@ -9,17 +9,10 @@ import { HamburgerMenu } from '../components/HamburgerMenu';
 import { SetupScreen } from './SetupScreen';
 import { useLocationTracker } from '../hooks/useLocationTracker';
 import { COLORS, SHADOWS, SPACING, RADIUS } from '../constants/theme';
-import { InterstitialAd, AdEventType, TestIds } from 'react-native-google-mobile-ads';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useInterstitialAd } from '../hooks/useInterstitialAd';
 
 import { useAppStore } from '../store/useAppStore';
-
-// Production Ad Unit IDs
-const interstitialAdUnitId = __DEV__ ? TestIds.INTERSTITIAL : 'ca-app-pub-5025716288565530/2873123656';
-
-const interstitial = InterstitialAd.createForAdRequest(interstitialAdUnitId, {
-    requestNonPersonalizedAdsOnly: true,
-});
 
 export const HomeScreen = () => {
     // Inicializar hook de tracking
@@ -33,26 +26,9 @@ export const HomeScreen = () => {
 
     const [showSetup, setShowSetup] = useState(false);
     const [showFavorites, setShowFavorites] = useState(false);
-    const [interstitialLoaded, setInterstitialLoaded] = useState(false);
 
-    useEffect(() => {
-        const unsubscribe = interstitial.addAdEventListener(AdEventType.LOADED, () => {
-            setInterstitialLoaded(true);
-        });
-
-        const unsubscribeClosed = interstitial.addAdEventListener(AdEventType.CLOSED, () => {
-            setInterstitialLoaded(false);
-            interstitial.load(); // Load next ad
-        });
-
-        // Start loading the interstitial straight away
-        interstitial.load();
-
-        return () => {
-            unsubscribe();
-            unsubscribeClosed();
-        };
-    }, []);
+    // Use reusable Ad Hook
+    const { showInterstitial, isLoaded: interstitialLoaded } = useInterstitialAd();
 
     const handleFavoriteSelect = (fav: any) => {
         setDestination(fav);
@@ -67,7 +43,7 @@ export const HomeScreen = () => {
 
                 // Show Interstitial if NOT Premium and Ad is Loaded
                 if (!isPremium && interstitialLoaded) {
-                    interstitial.show();
+                    showInterstitial();
                 }
             } else {
                 alert('Límite de favoritos alcanzado (Máx 3)');
