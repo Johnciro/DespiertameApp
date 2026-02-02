@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
 const API_KEYS = {
     // google: 'goog_...', // Android API Key from RevenueCat
     // ios: 'appl_...',    // iOS API Key from RevenueCat (Future)
-    google: 'test_yaLYMBktjFUAxkOlcqRjauzMcSy',
+    google: 'goog_cABuePhGTxhisKFQXBufzMbBznN',
 };
 
 export interface Product {
