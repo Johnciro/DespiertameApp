@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert, SafeAreaView } from 'react-native';
 import { COLORS, SPACING, RADIUS, SHADOWS } from '../constants/theme';
-import { PaymentService, PRODUCTS } from '../services/payment';
+import { PaymentService } from '../services/payment';
 import { useAppStore } from '../store/useAppStore';
 
 interface PaywallScreenProps {
@@ -10,19 +10,43 @@ interface PaywallScreenProps {
 
 export const PaywallScreen: React.FC<PaywallScreenProps> = ({ onClose }) => {
     const [loading, setLoading] = useState(false);
+    const [products, setProducts] = useState<any[]>([]); // Use imported Product type ideally
     const setPremiumStatus = useAppStore((state) => state.setPremiumStatus);
 
-    const handlePurchase = async (productId: string) => {
+    useEffect(() => {
+        loadOfferings();
+    }, []);
+
+    const loadOfferings = async () => {
+        setLoading(true);
+        const offerings = await PaymentService.getOfferings();
+        setProducts(offerings);
+        setLoading(false);
+    };
+
+    const handlePurchase = async (product: any) => {
         setLoading(true);
         try {
-            const success = await PaymentService.purchaseProduct(productId);
+            // If it's the mock product (no rcPackage), simulate success
+            if (!product.rcPackage || !product.rcPackage.product) {
+                // Mock behavior fallback
+                setTimeout(() => {
+                    setPremiumStatus(true);
+                    setLoading(false);
+                    Alert.alert("Modo Prueba", "Compra simulada exitosa (Sin RevenueKey).");
+                    onClose();
+                }, 1000);
+                return;
+            }
+
+            const success = await PaymentService.purchasePackage(product.rcPackage);
             if (success) {
                 setPremiumStatus(true);
                 Alert.alert("¡Bienvenido a Premium!", "Gracias por tu apoyo. Disfruta de favoritos ilimitados y sin anuncios.", [
                     { text: "OK", onPress: onClose }
                 ]);
             } else {
-                Alert.alert("Error", "No se pudo completar la compra. Inténtalo de nuevo.");
+                // User cancelled or error (already handled in service, but we can show alert if strictly needed)
             }
         } catch (error) {
             Alert.alert("Error", "Ocurrió un error inesperado.");
@@ -40,6 +64,8 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = ({ onClose }) => {
                 Alert.alert("Restaurado", "Tus compras han sido restauradas.", [
                     { text: "OK", onPress: onClose }
                 ]);
+            } else {
+                Alert.alert("Aviso", "No se encontraron compras activas para restaurar.");
             }
         } finally {
             setLoading(false);
@@ -65,29 +91,36 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = ({ onClose }) => {
                     <FeatureItem icon="❤️" text="Apoya el desarrollo" />
                 </View>
 
-                <View style={styles.productsContainer}>
-                    {PRODUCTS.map((product) => (
-                        <TouchableOpacity
-                            key={product.id}
-                            style={styles.productCard}
-                            onPress={() => handlePurchase(product.id)}
-                            disabled={loading}
-                        >
-                            <View>
-                                <Text style={styles.productTitle}>{product.title}</Text>
-                                <Text style={styles.productDesc}>{product.description}</Text>
-                            </View>
-                            <Text style={styles.productPrice}>{product.price}</Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
+                {products.length === 0 ? (
+                    <View style={{ padding: 20 }}>
+                        <ActivityIndicator color={COLORS.primary} />
+                        <Text style={{ textAlign: 'center', color: '#888', marginTop: 10 }}>Cargando precios...</Text>
+                    </View>
+                ) : (
+                    <View style={styles.productsContainer}>
+                        {products.map((product) => (
+                            <TouchableOpacity
+                                key={product.id}
+                                style={styles.productCard}
+                                onPress={() => handlePurchase(product)}
+                                disabled={loading}
+                            >
+                                <View style={{ flex: 1 }}>
+                                    <Text style={styles.productTitle}>{product.title}</Text>
+                                    <Text style={styles.productDesc}>{product.description}</Text>
+                                </View>
+                                <Text style={styles.productPrice}>{product.price}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                )}
 
                 <TouchableOpacity onPress={handleRestore} style={styles.restoreButton}>
                     <Text style={styles.restoreText}>Restaurar Compras</Text>
                 </TouchableOpacity>
 
                 <Text style={styles.disclaimer}>
-                    Esta es una simulación de compra (Mock). No se realizará ningún cargo real.
+                    Suscripción auto-renovable. Cancela en cualquier momento desde Google Play.
                 </Text>
             </ScrollView>
 

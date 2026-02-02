@@ -5,10 +5,16 @@ import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { setupNotifications } from './src/utils/notifications';
 import * as Notifications from 'expo-notifications';
 import { useAppStore } from './src/store/useAppStore';
+import { PaymentService } from './src/services/payment';
 import mobileAds from 'react-native-google-mobile-ads';
+
+// ... imports
 
 export default function App() {
     useEffect(() => {
+        // Inicializar Servicio de Pagos (RevenueCat)
+        PaymentService.initialize();
+
         // Inicializar AdMob SDK
         mobileAds()
             .initialize()
@@ -22,6 +28,14 @@ export default function App() {
         // Inicializar sistema de notificaciones
         setupNotifications().catch(error => {
             console.error('Error setting up notifications:', error);
+        });
+
+        // Verificar estado de suscripción al abrir
+        PaymentService.checkSubscriptionStatus().then(isPremium => {
+            if (isPremium) {
+                console.log('💎 [Suscripción] Usuario es Premium');
+                useAppStore.getState().setPremiumStatus(true);
+            }
         });
 
         // Listener para cuando el usuario TOCA la notificación
