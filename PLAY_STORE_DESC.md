@@ -19,10 +19,14 @@ Despiértame: Alarma GPS
 🔋 **Ahorro de Batería**: Algoritmo optimizado para rastrear tu ubicación sin drenar tu batería.
 🎨 **Interfaz Moderna**: Diseño limpio, fácil de usar y con modo oscuro.
 
-**💎 VERSIÓN PREMIUM:**
-- Destinos Favoritos Ilimitados.
-- Experiencia 100% libre de anuncios.
-- Soporte prioritario.
+📢 **NUEVO: Comparte tu Viaje**
+Mantén tranquilos a tus amigos y familiares. Comparte tu destino y ubicación en tiempo real* con un solo toque vía WhatsApp, Telegram o SMS. (*Función Básica Gratuita).
+
+**💎 VERSIÓN PREMIUM (ProxiAlert PRO):**
+- 🌟 Destinos Favoritos Ilimitados.
+- 🚫 Experiencia 100% libre de anuncios.
+- 🔄 Soporte prioritario y actualizaciones anticipadas.
+- 💖 Apoya el desarrollo independiente.
 
 **¿POR QUÉ DESPIÉRTAME?**
 A diferencia de las alarmas tradicionales por hora, Despiértame se adapta al tráfico y retrasos. Si el autobús se tarda, tu alarma espera. Si el tráfico es rápido, tu alarma se anticipa.
