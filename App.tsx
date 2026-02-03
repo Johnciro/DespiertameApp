@@ -7,11 +7,16 @@ import * as Notifications from 'expo-notifications';
 import { useAppStore } from './src/store/useAppStore';
 import { PaymentService } from './src/services/payment';
 import mobileAds from 'react-native-google-mobile-ads';
+import analytics from '@react-native-firebase/analytics';
 
 // ... imports
 
 export default function App() {
     useEffect(() => {
+        // Inicializar Analytics
+        analytics().logEvent('app_open', {
+            platform: 'android',
+        });
         // Inicializar Servicio de Pagos (RevenueCat)
         PaymentService.initialize();
 

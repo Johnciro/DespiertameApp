@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "376755515301",
+    "project_id": "proxialert-6f850",
+    "storage_bucket": "proxialert-6f850.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:376755515301:android:e814d337b295b8907d424c",
+        "android_client_info": {
+          "package_name": "com.antigravity.proxialert"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD50oBpBo-kNYcrNtE897FjZuwC73rm-QI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

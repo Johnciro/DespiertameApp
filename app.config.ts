@@ -31,6 +31,7 @@ export default {
                 backgroundColor: "#ffffff"
             },
             package: "com.antigravity.proxialert",
+            googleServicesFile: "./google-services.json",
             permissions: [
                 "ACCESS_COARSE_LOCATION",
                 "ACCESS_FINE_LOCATION",
@@ -46,6 +47,8 @@ export default {
             }
         },
         plugins: [
+            "@react-native-firebase/app",
+            "@react-native-firebase/analytics",
             [
                 "expo-location",
                 {
