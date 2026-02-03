@@ -19,8 +19,8 @@ export const MapDisplay = () => {
             });
         } else if (currentLocation && !destination && mapRef.current) {
             mapRef.current.animateToRegion({
-                latitude: currentLocation.latitude,
-                longitude: currentLocation.longitude,
+                latitude: currentLocation.coords.latitude,
+                longitude: currentLocation.coords.longitude,
                 latitudeDelta: 0.01,
                 longitudeDelta: 0.01,
             });
