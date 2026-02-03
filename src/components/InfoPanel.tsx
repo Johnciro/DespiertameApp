@@ -113,7 +113,10 @@ export const InfoPanel = () => {
             if (adLoaded) {
                 rewardedAd.show();
             } else {
-                alert('Cargando anuncio... Por favor espera un momento.');
+                // If not loaded yet, force a reload and show loading state
+                console.log('🔄 [AD] Ad not ready, forcing reload...');
+                setIsAdLoading(true);
+                rewardedAd.load();
             }
             return;
         }
@@ -242,7 +245,7 @@ export const InfoPanel = () => {
                                 : limitReached
                                     ? 'LÍMITE DIARIO ALCANZADO'
                                     : needsToWatchAd
-                                        ? (isAdLoading ? 'CARGANDO ANUNCIO...' : 'VER ANUNCIO PARA DESBLOQUEAR')
+                                        ? (isAdLoading ? 'PREPARANDO VIAJE...' : 'VER VIDEO PARA DESBLOQUEAR')
                                         : 'INICIAR ALERTA'}
                         </Text>
                     </View>
