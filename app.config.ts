@@ -48,7 +48,6 @@ export default {
         },
         plugins: [
             "@react-native-firebase/app",
-            "@react-native-firebase/analytics",
             [
                 "expo-location",
                 {
