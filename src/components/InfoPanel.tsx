@@ -136,26 +136,25 @@ export const InfoPanel = () => {
         if (!destination) return;
 
         try {
-            // Calcular ETA aproximado si tenemos distancia (asumiendo 30km/h velocidad promedio bus)
-            let etaText = '';
-            // No tenemos la velocidad real aquí, pero podemos estimar algo genérico o solo enviar destino.
-            // Para MVP solo enviamos destino.
-
             const message = `🚌 Voy camino a: *${destination.name}* usando ProxiAlert. \n\n📍 Te avisaré cuando llegue. \n\nDescarga la App aquí: https://play.google.com/store/apps/details?id=com.antigravity.proxialert`;
 
-            const result = await Share.share({
+            await Share.share({
                 message: message,
             });
+        } catch (error: any) {
+            alert(error.message);
+        }
+    };
 
-            if (result.action === Share.sharedAction) {
-                if (result.activityType) {
-                    // shared with activity type of result.activityType
-                } else {
-                    // shared
-                }
-            } else if (result.action === Share.dismissedAction) {
-                // dismissed
-            }
+    const handleNotifyArrival = async () => {
+        if (!destination) return;
+
+        try {
+            const message = `🏁 ¡Ya llegué a: *${destination.name}*! \n\nGracias por acompañarme usando ProxiAlert. \n\nDescarga la App tú también: https://play.google.com/store/apps/details?id=com.antigravity.proxialert`;
+
+            await Share.share({
+                message: message,
+            });
         } catch (error: any) {
             alert(error.message);
         }
@@ -269,8 +268,11 @@ export const InfoPanel = () => {
                         <Text style={styles.alarmMessage}>
                             {hasDestination ? i18n.t('alarmMessage', { destination: destination.name }) : ''}
                         </Text>
+                        <TouchableOpacity style={styles.notifyArrivalBtn} onPress={handleNotifyArrival}>
+                            <Text style={styles.notifyArrivalText}>📢 NOTIFICAR MI LLEGADA</Text>
+                        </TouchableOpacity>
                         <TouchableOpacity style={styles.stopAlarmBtn} onPress={handleStopAlarm}>
-                            <Text style={styles.stopAlarmText}>{i18n.t('stopAlarmBtn')}</Text>
+                            <Text style={styles.stopAlarmText}>{i18n.t('stopAlarmBtn').toUpperCase()}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -444,18 +446,35 @@ const styles = StyleSheet.create({
         marginBottom: SPACING.l,
         color: COLORS.text,
     },
+    adBtn: {
+        backgroundColor: '#F5A623',
+    },
+    notifyArrivalBtn: {
+        backgroundColor: COLORS.success,
+        paddingVertical: SPACING.m,
+        paddingHorizontal: SPACING.xl,
+        borderRadius: RADIUS.round,
+        marginBottom: SPACING.m,
+        width: '100%',
+        alignItems: 'center',
+        ...SHADOWS.default,
+    },
+    notifyArrivalText: {
+        color: COLORS.white,
+        fontSize: FONT_SIZES.medium,
+        fontWeight: 'bold',
+    },
     stopAlarmBtn: {
         backgroundColor: COLORS.danger,
         paddingVertical: SPACING.m,
         paddingHorizontal: SPACING.xl,
         borderRadius: RADIUS.round,
+        width: '100%',
+        alignItems: 'center',
     },
     stopAlarmText: {
         color: COLORS.white,
         fontSize: FONT_SIZES.large,
         fontWeight: 'bold',
-    },
-    adBtn: {
-        backgroundColor: '#F5A623',
     },
 });
