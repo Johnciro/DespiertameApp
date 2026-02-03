@@ -14,13 +14,14 @@ Despiértame: Alarma GPS
 
 **🚀 CARACTERÍSTICAS PRINCIPALES:**
 
-📍 **Alarma por Ubicación**: Selecciona tu destino en el mapa y relájate. La alarma sonará solo cuando estés cerca.
-⭐ **Favoritos Inteligentes**: Guarda tus destinos frecuentes (Casa, Trabajo, Universidad) para activarlos con un solo toque. ¡Sin gastar datos extra!
-🔋 **Ahorro de Batería**: Algoritmo optimizado para rastrear tu ubicación sin drenar tu batería.
-🎨 **Interfaz Moderna**: Diseño limpio, fácil de usar y con modo oscuro.
+📍 **Alarma por Ubicación**: Selecciona tu destino y relájate. La alarma sonará solo cuando estés cerca.
+⭐ **Favoritos Inteligentes**: Guarda tus destinos frecuentes para un acceso rápido.
+🏁 **Notificación de Llegada**: Informa a tus contactos automáticamente cuando llegues a salvo con un solo clic.
+🔋 **Ahorro de Batería**: GPS inteligente que cuida tu energía.
+🎨 **Interfaz Moderna**: Diseño premium, intuitivo y con modo oscuro.
 
-📢 **NUEVO: Comparte tu Viaje**
-Mantén tranquilos a tus amigos y familiares. Comparte tu destino y ubicación en tiempo real* con un solo toque vía WhatsApp, Telegram o SMS. (*Función Básica Gratuita).
+📢 **SEGURIDAD: Comparte tu Viaje**
+Mantén tranquilos a tus amigos y familiares. Comparte tu ruta al salir y notifica tu llegada al final vía WhatsApp o Telegram. (*Función Básica Gratuita).
 
 **💎 VERSIÓN PREMIUM (ProxiAlert PRO):**
 - 🌟 Destinos Favoritos Ilimitados.
