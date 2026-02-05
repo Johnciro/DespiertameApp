@@ -11,6 +11,14 @@ interface FavoritesPanelProps {
 
 export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({ visible, onClose, onSelect }) => {
     const favorites = useAppStore((state) => state.favorites);
+    const removeFavorite = useAppStore((state) => state.removeFavorite);
+
+    const handleDelete = (name: string) => {
+        const result = removeFavorite(name);
+        if (!result.success) {
+            alert(`No puedes eliminar este favorito aún. Falta(n) ${result.remainingDays} día(s) para poder cambiarlo.`);
+        }
+    };
 
     return (
         <Modal
@@ -45,12 +53,22 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({ visible, onClose
                                         <Text style={styles.icon}>📍</Text>
                                     </View>
                                     <View style={styles.infoContainer}>
-                                        <Text style={styles.name}>{fav.name}</Text>
-                                        <Text style={styles.coords}>
-                                            {fav.location.latitude.toFixed(4)}, {fav.location.longitude.toFixed(4)}
-                                        </Text>
+                                        <TouchableOpacity
+                                            style={styles.clickableArea}
+                                            onPress={() => onSelect(fav)}
+                                        >
+                                            <Text style={styles.name}>{fav.name}</Text>
+                                            <Text style={styles.coords}>
+                                                {fav.location.latitude.toFixed(4)}, {fav.location.longitude.toFixed(4)}
+                                            </Text>
+                                        </TouchableOpacity>
                                     </View>
-                                    <Text style={styles.arrow}>›</Text>
+                                    <TouchableOpacity
+                                        onPress={() => handleDelete(fav.name)}
+                                        style={styles.deleteButton}
+                                    >
+                                        <Text style={styles.deleteIcon}>🗑️</Text>
+                                    </TouchableOpacity>
                                 </TouchableOpacity>
                             ))
                         )}
@@ -130,10 +148,16 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#999',
     },
-    arrow: {
-        fontSize: 24,
-        color: '#CCC',
+    deleteButton: {
+        padding: SPACING.s,
         marginLeft: SPACING.s,
+    },
+    deleteIcon: {
+        fontSize: 18,
+        opacity: 0.6,
+    },
+    clickableArea: {
+        flex: 1,
     },
     emptyState: {
         alignItems: 'center',

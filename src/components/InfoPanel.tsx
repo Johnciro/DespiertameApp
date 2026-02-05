@@ -32,11 +32,13 @@ export const InfoPanel = () => {
         alertRadius,
         setAlertRadius,
         isPremium,
+        favorites,
         dailyTripsCount,
         maxDailyTrips,
         setPremiumStatus,
         isRewardAdWatched,
         unlockTripWithAd,
+        addFavorite,
     } = useAppStore();
 
     const [isAdLoading, setIsAdLoading] = React.useState(false);
@@ -49,16 +51,20 @@ export const InfoPanel = () => {
     const hasDestination = !!destination;
 
     // Lógica de Bloqueo / Desbloqueo
-    const limitReached = !isPremium && dailyTripsCount >= maxDailyTrips;
-    const isFirstTrip = dailyTripsCount === 0;
-    const needsToWatchAd = !isPremium && !isFirstTrip && !isRewardAdWatched && !isTracking;
+    const isFav = hasDestination && favorites.some(fav =>
+        fav.location.latitude === destination.location.latitude &&
+        fav.location.longitude === destination.location.longitude
+    );
 
-    const canStart = hasDestination && (isPremium || !limitReached) && (!needsToWatchAd || isRewardAdWatched);
+    const maxFavs = isPremium ? 30 : 3;
+    const favoritesFull = favorites.length >= maxFavs;
+    const needsToWatchAd = !isPremium && isFav && !isTracking && !isRewardAdWatched;
+
+    const canStart = hasDestination && isFav && (isPremium || isRewardAdWatched);
 
     // Load rewarded ad on mount and after each use
     React.useEffect(() => {
         const unsubscribeLoaded = rewardedAd.addAdEventListener(RewardedAdEventType.LOADED, () => {
-            console.log('✅ [AD] Rewarded ad loaded');
             setAdLoaded(true);
             setIsAdLoading(false);
         });
@@ -66,32 +72,26 @@ export const InfoPanel = () => {
         const unsubscribeEarned = rewardedAd.addAdEventListener(
             RewardedAdEventType.EARNED_REWARD,
             reward => {
-                console.log('💰 [AD] Rewarded ad earned reward:', reward);
                 unlockTripWithAd();
-                alert('¡Recompensa obtenida! Viaje desbloqueado.');
+                alert('¡Vídeo visto! Alerta desbloqueada.');
             },
         );
 
         const unsubscribeClosed = rewardedAd.addAdEventListener(AdEventType.CLOSED, () => {
-            console.log('🔄 [AD] Rewarded ad closed, loading next ad');
             setAdLoaded(false);
             setIsAdLoading(true);
             rewardedAd.load();
         });
 
         const unsubscribeError = rewardedAd.addAdEventListener(AdEventType.ERROR, (error) => {
-            console.error('❌ [AD] Rewarded ad error:', error);
             setIsAdLoading(false);
             setAdLoaded(false);
-            // Retry loading after 5 seconds
             setTimeout(() => {
-                console.log('🔄 [AD] Retrying rewarded ad load...');
                 setIsAdLoading(true);
                 rewardedAd.load();
             }, 5000);
         });
 
-        // Start loading the first ad
         setIsAdLoading(true);
         rewardedAd.load();
 
@@ -109,12 +109,22 @@ export const InfoPanel = () => {
             return;
         }
 
+        if (!isFav && hasDestination) {
+            if (favoritesFull) {
+                alert(`Límite de favoritos alcanzado (${maxFavs}). Pásate a Premium para tener 30.`);
+                return;
+            }
+            const success = addFavorite(destination);
+            if (success) {
+                alert('Destino guardado. Ahora puedes iniciar la alerta.');
+            }
+            return;
+        }
+
         if (needsToWatchAd) {
             if (adLoaded) {
                 rewardedAd.show();
             } else {
-                // If not loaded yet, force a reload and show loading state
-                console.log('🔄 [AD] Ad not ready, forcing reload...');
                 setIsAdLoading(true);
                 rewardedAd.load();
             }
@@ -128,22 +138,16 @@ export const InfoPanel = () => {
 
     const handleStopAlarm = () => {
         stopAlarm();
-        // Show Interstitial if NOT Premium
         if (!isPremium && interstitialLoaded) {
-            console.log('🎬 [AD] Showing Interstitial after alarm stop');
             showInterstitial();
         }
     };
 
     const handleShareTrip = async () => {
         if (!destination) return;
-
         try {
             const message = `🚌 Voy camino a: *${destination.name}* usando ProxiAlert. \n\n📍 Te avisaré cuando llegue. \n\nDescarga la App aquí: https://play.google.com/store/apps/details?id=com.antigravity.proxialert`;
-
-            await Share.share({
-                message: message,
-            });
+            await Share.share({ message });
         } catch (error: any) {
             alert(error.message);
         }
@@ -151,13 +155,9 @@ export const InfoPanel = () => {
 
     const handleNotifyArrival = async () => {
         if (!destination) return;
-
         try {
             const message = `🏁 ¡Ya llegué a: *${destination.name}*! \n\nGracias por acompañarme usando ProxiAlert. \n\nDescarga la App tú también: https://play.google.com/store/apps/details?id=com.antigravity.proxialert`;
-
-            await Share.share({
-                message: message,
-            });
+            await Share.share({ message });
         } catch (error: any) {
             alert(error.message);
         }
@@ -171,7 +171,6 @@ export const InfoPanel = () => {
                     <TouchableOpacity
                         style={styles.headerRow}
                         onLongPress={() => {
-                            // Secret Debug Toggle
                             setPremiumStatus(!isPremium);
                             alert(`Modo ${!isPremium ? 'PREMIUM' : 'FREE'} activado`);
                         }}
@@ -192,7 +191,7 @@ export const InfoPanel = () => {
                         </View>
                     </TouchableOpacity>
 
-                    {/* Share Button (Only if destination selected) */}
+                    {/* Share Button */}
                     {hasDestination && (
                         <TouchableOpacity
                             style={styles.shareButton}
@@ -224,16 +223,17 @@ export const InfoPanel = () => {
                 </View >
 
                 {/* Main Action Button */}
-                < TouchableOpacity
+                <TouchableOpacity
                     style={
                         [
                             styles.actionBtn,
                             isTracking ? styles.stopBtn : styles.startBtn,
-                            needsToWatchAd && styles.adBtn, // Color especial para ver video
-                            !canStart && !needsToWatchAd && !isTracking && styles.disabledBtn
+                            !isFav && hasDestination && styles.saveBtn, // Nuevo estilo para guardar
+                            needsToWatchAd && styles.adBtn,
+                            !hasDestination && styles.disabledBtn
                         ]}
                     onPress={handleMainButtonPress}
-                    disabled={!isTracking && !canStart && !needsToWatchAd}
+                    disabled={!hasDestination && !isTracking}
                 >
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         {needsToWatchAd && isAdLoading && (
@@ -242,25 +242,23 @@ export const InfoPanel = () => {
                         <Text style={styles.actionBtnText}>
                             {isTracking
                                 ? 'DETENER ALERTA'
-                                : limitReached
-                                    ? 'LÍMITE DIARIO ALCANZADO'
-                                    : needsToWatchAd
-                                        ? (isAdLoading ? 'PREPARANDO VIAJE...' : 'VER VIDEO PARA DESBLOQUEAR')
-                                        : 'INICIAR ALERTA'}
+                                : !hasDestination
+                                    ? 'SELECCIONA UN DESTINO'
+                                    : !isFav
+                                        ? 'GUARDAR EN FAVORITOS'
+                                        : needsToWatchAd
+                                            ? (isAdLoading ? 'PREPARANDO VIAJE...' : 'VER VIDEO PARA INICIAR')
+                                            : 'INICIAR ALERTA'}
                         </Text>
                     </View>
                 </TouchableOpacity >
 
-                {/* Usos Counter (Minimal) */}
-                {
-                    !isPremium && (
-                        <View style={styles.usageCounter}>
-                            <Text style={styles.usageText}>
-                                {dailyTripsCount}/{maxDailyTrips}
-                            </Text>
-                        </View>
-                    )
-                }
+                {/* Favoritos Counter */}
+                <View style={styles.usageCounter}>
+                    <Text style={styles.usageText}>
+                        {favorites.length}/{maxFavs} Favoritos {isPremium ? '💎' : ''}
+                    </Text>
+                </View>
             </View >
 
             {/* Modal de Alarma */}
@@ -451,6 +449,9 @@ const styles = StyleSheet.create({
     },
     adBtn: {
         backgroundColor: '#F5A623',
+    },
+    saveBtn: {
+        backgroundColor: COLORS.secondary || '#4A90E2', // Use a blue/secondary color for saving
     },
     notifyArrivalBtn: {
         backgroundColor: COLORS.success,

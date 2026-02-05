@@ -4,7 +4,7 @@ export default {
     expo: {
         name: "ProxiAlert",
         slug: "despiertame", // Keep old slug for EAS compatibility
-        version: "1.0.0",
+        version: "1.1.0",
         orientation: "portrait",
         icon: "./assets/icon.png",
         userInterfaceStyle: "light",
@@ -31,6 +31,7 @@ export default {
                 backgroundColor: "#ffffff"
             },
             package: "com.antigravity.proxialert",
+            versionCode: 2,
             googleServicesFile: "./google-services.json",
             permissions: [
                 "ACCESS_COARSE_LOCATION",

@@ -42,5 +42,5 @@ export interface AppState {
 
     // Favorites Actions
     addFavorite: (destination: Destination) => boolean;
-    removeFavorite: (name: string) => void;
+    removeFavorite: (name: string) => { success: boolean; remainingDays?: number };
 }

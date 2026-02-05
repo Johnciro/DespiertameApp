@@ -16,7 +16,7 @@ export const useAppStore = create<AppState>()(
             // Freemium State
             isPremium: false,
             dailyTripsCount: 0,
-            maxDailyTrips: 200,
+            maxDailyTrips: 3, // Now refers to search-to-favorite limit if needed, or we can use favorites.length
             lastResetDate: new Date().toDateString(),
             isRewardAdWatched: false,
             favorites: [],
@@ -27,29 +27,26 @@ export const useAppStore = create<AppState>()(
 
             setIsTracking: (isTracking) => {
                 const state = get();
+
+                // Enforce "Must be Favorite to Start"
+                if (isTracking && state.destination) {
+                    const isFav = state.favorites.some(fav =>
+                        fav.location.latitude === state.destination?.location.latitude &&
+                        fav.location.longitude === state.destination?.location.longitude
+                    );
+                    if (!isFav) {
+                        console.warn('Cannot start: Destination must be a favorite');
+                        return;
+                    }
+                }
+
                 if (isTracking && !state.isTracking && !state.isPremium) {
-                    const today = new Date().toDateString();
-                    if (today !== state.lastResetDate) {
+                    // We still keep the ad requirement for free users
+                    if (state.isRewardAdWatched) {
                         set({
-                            dailyTripsCount: 1,
-                            lastResetDate: today,
                             isTracking: true,
                             isRewardAdWatched: false
                         });
-                        return;
-                    }
-                    if (state.dailyTripsCount === 0) {
-                        set({ dailyTripsCount: 1, isTracking: true });
-                        return;
-                    }
-                    if (state.isRewardAdWatched) {
-                        if (state.dailyTripsCount < state.maxDailyTrips) {
-                            set({
-                                dailyTripsCount: state.dailyTripsCount + 1,
-                                isTracking: true,
-                                isRewardAdWatched: false
-                            });
-                        }
                     } else {
                         return;
                     }
@@ -78,12 +75,17 @@ export const useAppStore = create<AppState>()(
             // Favorites Actions
             addFavorite: (destination) => {
                 const state = get();
-                // Limit to 3 for free users (Profitability Check)
-                if (!state.isPremium && state.favorites.length >= 3) {
+                const maxFavs = state.isPremium ? 30 : 3;
+
+                // Limit check
+                if (state.favorites.length >= maxFavs) {
                     return false; // Limit reached
                 }
-                // Check if already exists
-                if (state.favorites.some(fav => fav.name === destination.name)) {
+                // Check if already exists (by coordinates to be safe)
+                if (state.favorites.some(fav =>
+                    fav.location.latitude === destination.location.latitude &&
+                    fav.location.longitude === destination.location.longitude
+                )) {
                     return true; // Already saved
                 }
 
@@ -99,25 +101,19 @@ export const useAppStore = create<AppState>()(
                 const state = get();
                 const favorite = state.favorites.find(fav => fav.name === name);
 
-                if (favorite && !state.isPremium) {
+                if (favorite) {
                     const now = Date.now();
                     const createdAt = favorite.createdAt || 0;
                     const daysSinceCreation = (now - createdAt) / (1000 * 60 * 60 * 24);
 
                     if (daysSinceCreation < 30) {
-                        // Locked
-                        // We can't return a value here easily without changing interface, 
-                        // but we can just NOT remove it. 
-                        // The UI should check this before calling or handle the state update.
-                        // Ideally we throw or return false, but let's just ignore for now 
-                        // and handle the check in UI/Component for better UX feedback.
-                        // actually, let's just not remove it.
-                        console.warn('Favorite is locked');
-                        return;
+                        const remainingDays = Math.ceil(30 - daysSinceCreation);
+                        return { success: false, remainingDays };
                     }
                 }
 
                 set({ favorites: state.favorites.filter(fav => fav.name !== name) });
+                return { success: true };
             }
         }),
         {

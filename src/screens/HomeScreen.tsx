@@ -37,16 +37,17 @@ export const HomeScreen = () => {
 
     const handleSaveFavorite = () => {
         if (destination) {
+            const maxFavs = isPremium ? 30 : 3;
+            if (favorites.length >= maxFavs) {
+                alert(`Límite de favoritos alcanzado (${maxFavs}). Pásate a Premium para tener 30.`);
+                return;
+            }
             const success = addFavorite(destination);
             if (success) {
                 alert('Destino guardado en favoritos');
-
-                // Show Interstitial if NOT Premium and Ad is Loaded
                 if (!isPremium && interstitialLoaded) {
                     showInterstitial();
                 }
-            } else {
-                alert('Límite de favoritos alcanzado (Máx 3)');
             }
         } else {
             alert('Selecciona un destino primero');
