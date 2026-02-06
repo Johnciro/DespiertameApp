@@ -5,6 +5,7 @@ import { COLORS, SPACING, RADIUS, SHADOWS } from '../constants/theme';
 interface HamburgerMenuProps {
     onOpenSetup: () => void;
     onOpenFavorites: () => void;
+    onOpenPremium: () => void;
     onToggleSaveFavorite?: () => void;
     showSaveButton: boolean;
     isFavorite: boolean;
@@ -13,6 +14,7 @@ interface HamburgerMenuProps {
 export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
     onOpenSetup,
     onOpenFavorites,
+    onOpenPremium,
     onToggleSaveFavorite,
     showSaveButton,
     isFavorite
@@ -65,6 +67,16 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
                         >
                             <Text style={styles.menuIcon}>⭐</Text>
                             <Text style={styles.menuText}>Favoritos</Text>
+                        </TouchableOpacity>
+
+                        <View style={styles.divider} />
+
+                        <TouchableOpacity
+                            style={styles.menuItem}
+                            onPress={() => handleMenuAction(onOpenPremium)}
+                        >
+                            <Text style={styles.menuIcon}>💎</Text>
+                            <Text style={[styles.menuText, { color: COLORS.primary }]}>Pasar a Premium</Text>
                         </TouchableOpacity>
 
                         {showSaveButton && onToggleSaveFavorite && (

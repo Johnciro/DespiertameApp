@@ -20,7 +20,7 @@ const rewardedAd = RewardedAd.createForAdRequest(rewardedAdUnitId, {
     requestNonPersonalizedAdsOnly: true,
 });
 
-export const InfoPanel = () => {
+export const InfoPanel = ({ onOpenPremium }: { onOpenPremium: () => void }) => {
     const {
         destination,
         setDestination,
@@ -58,9 +58,9 @@ export const InfoPanel = () => {
 
     const maxFavs = isPremium ? 30 : 3;
     const favoritesFull = favorites.length >= maxFavs;
-    const needsToWatchAd = !isPremium && isFav && !isTracking && !isRewardAdWatched;
+    const needsToWatchAd = !isPremium && isFav && !isTracking && !isRewardAdWatched && dailyTripsCount >= maxDailyTrips;
 
-    const canStart = hasDestination && isFav && (isPremium || isRewardAdWatched);
+    const canStart = hasDestination && isFav && (isPremium || isRewardAdWatched || dailyTripsCount < maxDailyTrips);
 
     // Load rewarded ad on mount and after each use
     React.useEffect(() => {
@@ -84,6 +84,7 @@ export const InfoPanel = () => {
         });
 
         const unsubscribeError = rewardedAd.addAdEventListener(AdEventType.ERROR, (error) => {
+            console.error('Rewarded Ad Error:', error);
             setIsAdLoading(false);
             setAdLoaded(false);
             setTimeout(() => {
@@ -106,6 +107,9 @@ export const InfoPanel = () => {
     const handleMainButtonPress = () => {
         if (isTracking) {
             setIsTracking(false);
+            if (!isPremium && interstitialLoaded) {
+                showInterstitial();
+            }
             return;
         }
 
@@ -248,10 +252,21 @@ export const InfoPanel = () => {
                                         ? 'GUARDAR EN FAVORITOS'
                                         : needsToWatchAd
                                             ? (isAdLoading ? 'PREPARANDO VIAJE...' : 'VER VIDEO PARA INICIAR')
-                                            : 'INICIAR ALERTA'}
+                                            : !isTracking && isFav && !isPremium && dailyTripsCount < maxDailyTrips
+                                                ? 'INICIAR (VIAJE GRATIS)'
+                                                : 'INICIAR ALERTA'}
                         </Text>
                     </View>
                 </TouchableOpacity >
+
+                {needsToWatchAd && (
+                    <TouchableOpacity
+                        style={styles.premiumPromoLink}
+                        onPress={onOpenPremium}
+                    >
+                        <Text style={styles.premiumPromoText}>💎 ¿Cansado de los videos? Pasar a Premium</Text>
+                    </TouchableOpacity>
+                )}
 
                 {/* Favoritos Counter */}
                 <View style={styles.usageCounter}>
@@ -480,5 +495,16 @@ const styles = StyleSheet.create({
         color: COLORS.white,
         fontSize: FONT_SIZES.large,
         fontWeight: 'bold',
+    },
+    premiumPromoLink: {
+        marginTop: 8,
+        alignItems: 'center',
+        paddingVertical: 4,
+    },
+    premiumPromoText: {
+        color: COLORS.primary,
+        fontSize: 12,
+        fontWeight: 'bold',
+        textDecorationLine: 'underline',
     },
 });

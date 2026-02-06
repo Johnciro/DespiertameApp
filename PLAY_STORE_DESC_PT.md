@@ -1,37 +1,37 @@
-# Ficha da Google Play Store (Português)
+# Ficha da# Google Play Store - ProxiAlert
 
 ## Título (30 caracteres)
-Me Acorde: Alarme GPS
+ProxiAlert: Alerta GPS
 
 ## Descrição Curta (80 caracteres)
-Não perca sua parada! Alarme inteligente que te acorda quando você chega.
+Não perca sua parada! Alarme inteligente baseado em seus lugares favoritos.
 
 ## Descrição Completa (4000 caracteres)
 
-**Cansado de perder o ponto do ônibus ou do trem?** 😴🚌
+**Cansado de perder sua parada no ônibus ou trem?** 😴🚌
 
-**Me Acorde** é o alarme GPS definitivo para viajantes, estudantes e trabalhadores. Esqueça de checar o mapa o tempo todo; nós monitoramos sua localização e te acordamos exatamente quando você estiver chegando.
+**ProxiAlert** é a ferramenta definitiva para quem viaja diariamente. Esqueça o estresse de vigiar o mapa; nós cuidamos da sua localização e te acordamos exatamente quando você estiver chegando aos seus destinos frequentes.
 
-**🚀 RECURSOS PRINCIPAIS:**
+**🚀 A DIFERENÇA PROXIALERT:**
 
-📍 **Alarme por Localização**: Selecione seu destino e relaxe. O alarme toca apenas quando você está perto.
-⭐ **Favoritos Inteligentes**: Salve seus destinos frequentes para acesso rápido.
-🏁 **Notificação de Chegada**: Avise seus entes queridos automaticamente quando chegar em segurança com um clique.
-🔋 **Economia de Bateria**: Algoritmo GPS otimizado que não consome sua bateria.
-🎨 **Interface Moderna**: Design limpo, intuitivo e com suporte ao Modo Escuro.
+📍 **Baseado em Favoritos**: Salve suas rotas diárias (casa, trabalho, faculdade). O ProxiAlert é otimizado para funcionar com seus lugares de confiança, economizando bateria e dados.
+🔒 **Segurança e Rotina**: Ao salvar um destino, ele fica bloqueado por 30 dias para garantir que suas rotas principais estejam sempre prontas e sem erros.
+🏁 **Notificação de Chegada**: Com um único toque, avise seus contatos que você chegou em segurança via WhatsApp.
+🔋 **Eficiente Extrema**: GPS de baixo consumo projetado para acompanhar você em trajetos longos.
 
-📢 **SEGURANÇA: Compartilhe sua Viagem**
-Mantenha amigos e familiares tranquilos. Compartilhe sua rota ao sair e notifique sua chegada ao final via WhatsApp ou Telegram. (*Recurso Básico Gratuito).
+**📢 COMPARTILHE SUA LOCALIZAÇÃO**
+Mantenha seus entes queridos tranquilos. Compartilhe sua rota em tempo real ao sair e notifique sua chegada ao final com uma mensagem automática.
 
-**💎 VERSÃO PREMIUM (ProxiAlert PRO):**
-- 🌟 Favoritos Ilimitados.
-- 🚫 Experiência 100% sem anúncios.
-- 🔄 Suporte prioritário e atualizações antecipadas.
+**💎 VERSÃO PREMIUM:**
+Se você deseja flexibilidade total, o plano Premium oferece:
+- ✨ **30 Slots de Favoritos**: Para suas viagens de fim de semana, turismo e novas aventuras.
+- 🚫 **Sem Publicidade**: Uma experiência fluida e profissional.
+- 💖 **Apoie o Futuro**: Ajude-nos a continuar desenvolvendo ferramentas de mobilidade.
 
-**POR QUE ME ACORDE?**
-Diferente dos alarmes tradicionais por hora, o Me Acorde se adapta ao trânsito e atrasos. Se o ônibus atrasar, seu alarme espera. Se o trânsito fluir rápido, seu alarme antecipa.
+**POR QUE PROXIALERT?**
+Ao contrário dos alarmes tradicionales, o ProxiAlert não depende do tempo, mas da distância real. Se o transporte atrasar, o alarme espera com você.
 
-Baixe o **Me Acorde** hoje e viaje sem preocupações!
+Baixe o **ProxiAlert** hoje e durma tranquilo na sua próxima viagem!
 
 ---
-*Palavras-chave: alarme gps, alarme localização, transporte público, dormir no ônibus, soneca viagem, despertador gps.*
+*Palavras-chave: alarme gps, alarme localização, transporte público, dormir no ônibus, soneca viagem, despertador gps, segurança no transporte.*

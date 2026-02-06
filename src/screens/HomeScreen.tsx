@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, StatusBar, SafeAreaView } from 'react-native';
+import { View, StyleSheet, StatusBar, SafeAreaView, Modal } from 'react-native';
 import { MapDisplay } from '../components/MapDisplay';
 import { DestinationSearch } from '../components/DestinationSearch';
 import { InfoPanel } from '../components/InfoPanel';
@@ -7,6 +7,7 @@ import { AdBanner } from '../components/AdBanner';
 import { FavoritesPanel } from '../components/FavoritesPanel';
 import { HamburgerMenu } from '../components/HamburgerMenu';
 import { SetupScreen } from './SetupScreen';
+import { PaywallScreen } from './PaywallScreen';
 import { useLocationTracker } from '../hooks/useLocationTracker';
 import { COLORS, SHADOWS, SPACING, RADIUS } from '../constants/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,6 +27,7 @@ export const HomeScreen = () => {
 
     const [showSetup, setShowSetup] = useState(false);
     const [showFavorites, setShowFavorites] = useState(false);
+    const [showPaywall, setShowPaywall] = useState(false);
 
     // Use reusable Ad Hook
     const { showInterstitial, isLoaded: interstitialLoaded } = useInterstitialAd();
@@ -79,12 +81,13 @@ export const HomeScreen = () => {
                 <HamburgerMenu
                     onOpenSetup={() => setShowSetup(true)}
                     onOpenFavorites={() => setShowFavorites(true)}
+                    onOpenPremium={() => setShowPaywall(true)}
                     onToggleSaveFavorite={handleSaveFavorite}
                     showSaveButton={!!destination}
                     isFavorite={!!isFavorite}
                 />
 
-                <InfoPanel />
+                <InfoPanel onOpenPremium={() => setShowPaywall(true)} />
 
                 {/* Favorites Panel Modal */}
                 <FavoritesPanel
@@ -92,6 +95,14 @@ export const HomeScreen = () => {
                     onClose={() => setShowFavorites(false)}
                     onSelect={handleFavoriteSelect}
                 />
+
+                <Modal
+                    visible={showPaywall}
+                    animationType="slide"
+                    onRequestClose={() => setShowPaywall(false)}
+                >
+                    <PaywallScreen onClose={() => setShowPaywall(false)} />
+                </Modal>
             </View>
 
             {/* Bottom Ad Banner - Solo si NO es Premium */}

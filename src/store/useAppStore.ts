@@ -41,17 +41,29 @@ export const useAppStore = create<AppState>()(
                 }
 
                 if (isTracking && !state.isTracking && !state.isPremium) {
-                    // We still keep the ad requirement for free users
-                    if (state.isRewardAdWatched) {
+                    // Check if they still have free daily trips
+                    const hasFreeTrips = state.dailyTripsCount < state.maxDailyTrips;
+
+                    if (hasFreeTrips || state.isRewardAdWatched) {
                         set({
                             isTracking: true,
-                            isRewardAdWatched: false
+                            isRewardAdWatched: false,
+                            dailyTripsCount: state.dailyTripsCount + 1
                         });
                     } else {
+                        // Needs to watch ad
                         return;
                     }
                 } else {
-                    set({ isTracking });
+                    // Increment counter for premium too, and handle stop
+                    if (isTracking && !state.isTracking) {
+                        set({
+                            isTracking: true,
+                            dailyTripsCount: state.dailyTripsCount + 1
+                        });
+                    } else {
+                        set({ isTracking });
+                    }
                 }
             },
 

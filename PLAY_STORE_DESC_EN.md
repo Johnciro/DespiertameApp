@@ -1,37 +1,37 @@
-# Google Play Store Listing (English)
+# Google Play Store Listing - ProxiAlert
 
-## Title (30 characters)
-Wake Me Up: GPS Alarm
+## Title (30 chars)
+ProxiAlert: GPS Alarm
 
-## Short Description (80 characters)
-Never miss your stop! Smart GPS alarm that wakes you up when you arrive.
+## Short Description (80 chars)
+Don't miss your stop! Smart alarm based on your favorite places.
 
-## Full Description (4000 characters)
+## Full Description (4000 chars)
 
-**Tired of missing your bus or train stop?** 😴🚌
+**Tired of missing your stop on the bus or train?** 😴🚌
 
-**Wake Me Up** is the ultimate GPS alarm for travelers, students, and commuters. Forget about checking the map constantly; we watch your location and wake you up exactly when you're arriving.
+**ProxiAlert** is the ultimate tool for daily commuters. Forget the stress of constantly checking the map; we watch your location and wake you up exactly when you're arriving at your frequent destinations.
 
-**🚀 KEY FEATURES:**
+**🚀 THE PROXIALERT DIFFERENCE:**
 
-📍 **Location-Based Alarm**: Select your destination and relax. The alarm sounds only when you're close.
-⭐ **Smart Favorites**: Save your frequent destinations for one-tap access.
-🏁 **Arrival Notification**: Automatically let your loved ones know you've arrived safely with one click.
-🔋 **Battery Saver**: Optimized GPS algorithm that won't drain your battery.
-🎨 **Modern Interface**: Clean, intuitive design with Dark Mode support.
+📍 **Favorites-Based**: Save your daily routes (home, work, college). ProxiAlert is optimized to work with your trusted places, saving battery and data.
+🔒 **Security & Routine**: When you save a destination, it's locked for 30 days to ensure your main routes are always ready and error-free.
+🏁 **Arrival Notification**: With a single tap, let your contacts know you've arrived safely via WhatsApp.
+🔋 **Extreme Efficiency**: Low-power GPS designed to accompany you on long journeys.
 
-📢 **SAFETY: Share Your Trip**
-Keep friends and family at ease. Share your route when you leave and notify your arrival at the end via WhatsApp or Telegram. (*Basic Free Feature).
+**📢 SHARE YOUR LOCATION**
+Keep your loved ones at peace. Share your route in real-time when you leave and notify your arrival at the end with an automatic message.
 
-**💎 PREMIUM VERSION (ProxiAlert PRO):**
-- 🌟 Unlimited Favorite Destinations.
-- 🚫 100% Ad-Free Experience.
-- 🔄 Priority support and early updates.
+**💎 PREMIUM VERSION:**
+If you want total flexibility, the Premium plan offers you:
+- ✨ **30 Favorite Slots**: For your weekend trips, sightseeing, and new adventures.
+- 🚫 **Ad-Free**: A smooth and professional experience.
+- 💖 **Support the Future**: Help us continue developing mobility tools.
 
-**WHY WAKE ME UP?**
-Unlike traditional time-based alarms, Wake Me Up adapts to traffic and delays. If the bus is late, your alarm waits. If traffic is fast, your alarm anticipates.
+**WHY PROXIALERT?**
+Unlike traditional alarms, ProxiAlert doesn't depend on time, but on real distance. If the transport is delayed, the alarm waits with you.
 
-Download **Wake Me Up** today and travel worry-free!
+Download **ProxiAlert** today and sleep soundly on your next trip!
 
 ---
-*Keywords: gps alarm, location alarm, public transport, sleep on bus, commute nap, gps wake up.*
+*Keywords: gps alarm, location alarm, public transport, sleep on bus, travel nap, gps wake up, transport safety.*
