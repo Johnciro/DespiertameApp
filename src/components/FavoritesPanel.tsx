@@ -58,6 +58,7 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({ visible, onClose
                                 </Text>
                                 <DestinationSearch
                                     autoSave={true}
+                                    isEmbedded={true}
                                     onSave={() => setIsAdding(false)}
                                 />
                             </View>

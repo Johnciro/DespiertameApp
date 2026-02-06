@@ -32,6 +32,8 @@ export interface AppState {
     maxFreeGoogleSearches: number;
     isSearchAdWatched: boolean;
 
+    isConfirmingFavorite: boolean;
+
     setDestination: (destination: Destination | null) => void;
     setCurrentLocation: (location: LocationObject) => void;
     setAlertRadius: (radius: number) => void;
@@ -52,4 +54,6 @@ export interface AppState {
     // Search Quota Actions
     incrementSearchCount: () => void;
     unlockSearchWithAd: () => void;
+
+    setIsConfirmingFavorite: (val: boolean) => void;
 }

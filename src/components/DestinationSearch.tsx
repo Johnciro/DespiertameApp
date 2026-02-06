@@ -23,10 +23,12 @@ const searchRewardedAd = RewardedAd.createForAdRequest(searchAdUnitId, {
 
 export const DestinationSearch = ({
     autoSave = false,
-    onSave
+    onSave,
+    isEmbedded = false
 }: {
     autoSave?: boolean,
-    onSave?: () => void
+    onSave?: () => void,
+    isEmbedded?: boolean
 }) => {
     const {
         setDestination,
@@ -36,7 +38,8 @@ export const DestinationSearch = ({
         maxFreeGoogleSearches,
         incrementSearchCount,
         unlockSearchWithAd,
-        addFavorite
+        addFavorite,
+        setIsConfirmingFavorite
     } = useAppStore();
     const [isAdLoading, setIsAdLoading] = useState(false);
     const [adLoaded, setAdLoaded] = useState(false);
@@ -112,12 +115,10 @@ export const DestinationSearch = ({
             };
 
             if (autoSave) {
-                const success = addFavorite(newDestination);
-                if (success) {
-                    onSave?.();
-                } else {
-                    alert('Límite de favoritos alcanzado.');
-                }
+                // Mover mapa y pedir confirmación
+                setDestination(newDestination);
+                setIsConfirmingFavorite(true);
+                onSave?.(); // Notifica al padre (cierra panel)
             } else {
                 setDestination(newDestination);
             }
@@ -127,11 +128,11 @@ export const DestinationSearch = ({
     };
 
     return (
-        <View style={styles.container}>
+        <View style={isEmbedded ? styles.containerEmbedded : styles.container}>
             {hasQuota ? (
                 <GooglePlacesAutocomplete
                     key={searchKey}
-                    placeholder="Buscar destino para guardar..."
+                    placeholder={isEmbedded ? "Escribe una dirección..." : "Buscar destino..."}
                     onPress={handlePressGoogle}
                     query={{
                         key: GOOGLE_PLACES_API_KEY,
@@ -142,7 +143,7 @@ export const DestinationSearch = ({
                     styles={{
                         container: { flex: 0, zIndex: 999 },
                         textInput: styles.textInput,
-                        listView: styles.listView,
+                        listView: isEmbedded ? styles.listViewEmbedded : styles.listView,
                         row: styles.row,
                         description: styles.description,
                     }}
@@ -218,5 +219,23 @@ const styles = StyleSheet.create({
         color: '#E67E22',
         fontSize: 11,
         fontWeight: 'bold',
+    },
+    containerEmbedded: {
+        width: '100%',
+        minHeight: 50,
+        zIndex: 10,
+    },
+    listViewEmbedded: {
+        backgroundColor: COLORS.white,
+        borderRadius: RADIUS.m,
+        marginTop: SPACING.s,
+        ...SHADOWS.default,
+        maxHeight: 200,
+        elevation: 10,
+        zIndex: 1000,
+        position: 'absolute',
+        top: 45,
+        left: 0,
+        right: 0,
     },
 });

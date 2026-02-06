@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, StatusBar, SafeAreaView, Modal } from 'react-native';
+import { View, StyleSheet, StatusBar, SafeAreaView, Modal, Text, TouchableOpacity } from 'react-native';
 import { MapDisplay } from '../components/MapDisplay';
 import { DestinationSearch } from '../components/DestinationSearch';
 import { InfoPanel } from '../components/InfoPanel';
@@ -29,12 +29,45 @@ export const HomeScreen = () => {
     const [showFavorites, setShowFavorites] = useState(false);
     const [showPaywall, setShowPaywall] = useState(false);
 
-    // Use reusable Ad Hook
+    const {
+        isConfirmingFavorite,
+        setIsConfirmingFavorite,
+        setDestination: storeSetDestination
+    } = useAppStore();
+
+    // Reusable Ad Hook
     const { showInterstitial, isLoaded: interstitialLoaded } = useInterstitialAd();
+
+    // Cerrar panel de favoritos si se entra en modo confirmación
+    React.useEffect(() => {
+        if (isConfirmingFavorite) {
+            setShowFavorites(false);
+        }
+    }, [isConfirmingFavorite]);
 
     const handleFavoriteSelect = (fav: any) => {
         setDestination(fav);
         setShowFavorites(false);
+    };
+
+    const handleConfirmSaveFavorite = () => {
+        if (destination) {
+            const success = addFavorite(destination);
+            if (success) {
+                alert('¡Destino guardado en favoritos! ⭐');
+                setIsConfirmingFavorite(false);
+                storeSetDestination(null); // Limpiar preview
+                if (!isPremium && interstitialLoaded) {
+                    showInterstitial();
+                }
+            }
+        }
+    };
+
+    const handleCancelSaveFavorite = () => {
+        setIsConfirmingFavorite(false);
+        storeSetDestination(null);
+        setShowFavorites(true); // Volver al panel
     };
 
     const handleSaveFavorite = () => {
@@ -66,8 +99,8 @@ export const HomeScreen = () => {
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" />
 
-            {/* Top Ad Banner - Solo si NO es Premium */}
-            {!isPremium && (
+            {/* Top Ad Banner - Solo si NO es Premium y NO estamos confirmando favorito */}
+            {!isPremium && !isConfirmingFavorite && (
                 <View style={styles.adPlaceholderTop}>
                     <AdBanner />
                 </View>
@@ -75,22 +108,54 @@ export const HomeScreen = () => {
 
             <View style={styles.contentContainer}>
                 <MapDisplay />
-                {/* Solo mostrar buscador si NO tiene favoritos. Si tiene, debe usarlos. */}
-                {favorites.length === 0 && (
+
+                {/* Solo mostrar buscador si NO tiene favoritos y NO está confirmando. */}
+                {favorites.length === 0 && !isConfirmingFavorite && (
                     <DestinationSearch />
                 )}
 
-                {/* Hamburger Menu */}
-                <HamburgerMenu
-                    onOpenSetup={() => setShowSetup(true)}
-                    onOpenFavorites={() => setShowFavorites(true)}
-                    onOpenPremium={() => setShowPaywall(true)}
-                    onToggleSaveFavorite={handleSaveFavorite}
-                    showSaveButton={!!destination}
-                    isFavorite={!!isFavorite}
-                />
+                {/* Hamburger Menu - Ocultar si está confirmando para no distraer */}
+                {!isConfirmingFavorite && (
+                    <HamburgerMenu
+                        onOpenSetup={() => setShowSetup(true)}
+                        onOpenFavorites={() => setShowFavorites(true)}
+                        onOpenPremium={() => setShowPaywall(true)}
+                        onToggleSaveFavorite={handleSaveFavorite}
+                        showSaveButton={!!destination}
+                        isFavorite={!!isFavorite}
+                    />
+                )}
 
-                <InfoPanel onOpenPremium={() => setShowPaywall(true)} />
+                {/* Info Panel - Ocultar si está confirmando */}
+                {!isConfirmingFavorite && (
+                    <InfoPanel onOpenPremium={() => setShowPaywall(true)} />
+                )}
+
+                {/* OVERLAY DE CONFIRMACIÓN DE FAVORITO */}
+                {isConfirmingFavorite && (
+                    <View style={styles.confirmationOverlay}>
+                        <View style={styles.confirmationCard}>
+                            <Text style={styles.confirmationTitle}>¿Guardar este destino?</Text>
+                            <Text style={styles.confirmationName} numberOfLines={2}>
+                                {destination?.name}
+                            </Text>
+                            <View style={styles.confirmationActions}>
+                                <TouchableOpacity
+                                    style={styles.cancelButton}
+                                    onPress={handleCancelSaveFavorite}
+                                >
+                                    <Text style={styles.cancelButtonText}>CANCELAR</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={styles.confirmButton}
+                                    onPress={handleConfirmSaveFavorite}
+                                >
+                                    <Text style={styles.confirmButtonText}>GUARDAR ⭐</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                )}
 
                 {/* Favorites Panel Modal */}
                 <FavoritesPanel
@@ -108,8 +173,8 @@ export const HomeScreen = () => {
                 </Modal>
             </View>
 
-            {/* Bottom Ad Banner - Solo si NO es Premium */}
-            {!isPremium && (
+            {/* Bottom Ad Banner - Solo si NO es Premium y NO estamos confirmando */}
+            {!isPremium && !isConfirmingFavorite && (
                 <View style={[styles.adPlaceholderBottom, { paddingBottom: insets.bottom }]}>
                     <AdBanner />
                 </View>
@@ -148,4 +213,61 @@ const styles = StyleSheet.create({
         fontSize: 12,
     },
 
+    confirmationOverlay: {
+        position: 'absolute',
+        bottom: 20,
+        left: SPACING.m,
+        right: SPACING.m,
+        zIndex: 100,
+    },
+    confirmationCard: {
+        backgroundColor: COLORS.white,
+        borderRadius: RADIUS.l,
+        padding: SPACING.m,
+        ...SHADOWS.default,
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+    },
+    confirmationTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: COLORS.text,
+        textAlign: 'center',
+        marginBottom: 8,
+    },
+    confirmationName: {
+        fontSize: 14,
+        color: '#666',
+        textAlign: 'center',
+        marginBottom: SPACING.m,
+    },
+    confirmationActions: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: SPACING.m,
+    },
+    cancelButton: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: RADIUS.m,
+        backgroundColor: '#F5F5F5',
+        alignItems: 'center',
+    },
+    confirmButton: {
+        flex: 2,
+        paddingVertical: 12,
+        borderRadius: RADIUS.m,
+        backgroundColor: COLORS.primary,
+        alignItems: 'center',
+    },
+    cancelButtonText: {
+        color: '#666',
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
+    confirmButtonText: {
+        color: COLORS.white,
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
 });

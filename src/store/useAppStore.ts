@@ -26,6 +26,8 @@ export const useAppStore = create<AppState>()(
             maxFreeGoogleSearches: 10,
             isSearchAdWatched: false,
 
+            isConfirmingFavorite: false,
+
             setDestination: (destination) => set({ destination: destination ? { ...destination } : null }),
             setCurrentLocation: (location) => set({ currentLocation: location }),
             setAlertRadius: (radius) => set({ alertRadius: radius }),
@@ -144,6 +146,8 @@ export const useAppStore = create<AppState>()(
                 isSearchAdWatched: true,
                 googleSearchCount: 0 // Reset counter after ad
             }),
+
+            setIsConfirmingFavorite: (val) => set({ isConfirmingFavorite: val }),
         }),
         {
             name: 'proxialert-storage',
