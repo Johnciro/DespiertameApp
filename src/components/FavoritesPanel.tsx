@@ -1,7 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, SafeAreaView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
 import { COLORS, SPACING, RADIUS, SHADOWS } from '../constants/theme';
 import { useAppStore } from '../store/useAppStore';
+import { DestinationSearch } from './DestinationSearch';
 
 interface FavoritesPanelProps {
     visible: boolean;
@@ -12,6 +13,13 @@ interface FavoritesPanelProps {
 export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({ visible, onClose, onSelect }) => {
     const favorites = useAppStore((state) => state.favorites);
     const removeFavorite = useAppStore((state) => state.removeFavorite);
+    const addFavorite = useAppStore((state) => state.addFavorite);
+    const isPremium = useAppStore((state) => state.isPremium);
+
+    const [isAdding, setIsAdding] = useState(false);
+
+    const maxFavs = isPremium ? 30 : 3;
+    const canAdd = favorites.length < maxFavs;
 
     const handleDelete = (name: string) => {
         const result = removeFavorite(name);
@@ -30,49 +38,82 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({ visible, onClose
             <View style={styles.modalOverlay}>
                 <View style={styles.panelContainer}>
                     <View style={styles.header}>
-                        <Text style={styles.title}>Mis Favoritos</Text>
-                        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                            <Text style={styles.closeButtonText}>✕</Text>
+                        <Text style={styles.title}>{isAdding ? 'Añadir Favorito' : 'Mis Favoritos'}</Text>
+                        <TouchableOpacity
+                            onPress={() => isAdding ? setIsAdding(false) : onClose()}
+                            style={styles.closeButton}
+                        >
+                            <Text style={styles.closeButtonText}>{isAdding ? '←' : '✕'}</Text>
                         </TouchableOpacity>
                     </View>
 
-                    <ScrollView style={styles.content}>
-                        {favorites.length === 0 ? (
-                            <View style={styles.emptyState}>
-                                <Text style={styles.emptyText}>No tienes favoritos guardados.</Text>
-                                <Text style={styles.emptySubtext}>Guarda destinos frecuentes para acceder rápido.</Text>
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                        style={styles.flexContent}
+                    >
+                        {isAdding ? (
+                            <View style={styles.searchContainer}>
+                                <Text style={styles.searchInstructions}>
+                                    Busca una dirección para guardarla en tu lista.
+                                </Text>
+                                <DestinationSearch
+                                    autoSave={true}
+                                    onSave={() => setIsAdding(false)}
+                                />
                             </View>
                         ) : (
-                            favorites.map((fav, index) => (
-                                <TouchableOpacity
-                                    key={index}
-                                    style={styles.favoriteItem}
-                                    onPress={() => onSelect(fav)}
-                                >
-                                    <View style={styles.iconContainer}>
-                                        <Text style={styles.icon}>📍</Text>
+                            <ScrollView style={styles.content}>
+                                {favorites.length === 0 ? (
+                                    <View style={styles.emptyState}>
+                                        <Text style={styles.emptyText}>No tienes favoritos guardados.</Text>
+                                        <Text style={styles.emptySubtext}>Añade tus destinos frecuentes para viajar rápido.</Text>
                                     </View>
-                                    <View style={styles.infoContainer}>
+                                ) : (
+                                    favorites.map((fav, index) => (
                                         <TouchableOpacity
-                                            style={styles.clickableArea}
+                                            key={index}
+                                            style={styles.favoriteItem}
                                             onPress={() => onSelect(fav)}
                                         >
-                                            <Text style={styles.name}>{fav.name}</Text>
-                                            <Text style={styles.coords}>
-                                                {fav.location.latitude.toFixed(4)}, {fav.location.longitude.toFixed(4)}
-                                            </Text>
+                                            <View style={styles.iconContainer}>
+                                                <Text style={styles.icon}>📍</Text>
+                                            </View>
+                                            <View style={styles.infoContainer}>
+                                                <View style={styles.clickableArea}>
+                                                    <Text style={styles.name}>{fav.name}</Text>
+                                                    <Text style={styles.coords}>
+                                                        {fav.location.latitude.toFixed(4)}, {fav.location.longitude.toFixed(4)}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                            <TouchableOpacity
+                                                onPress={() => handleDelete(fav.name)}
+                                                style={styles.deleteButton}
+                                            >
+                                                <Text style={styles.deleteIcon}>🗑️</Text>
+                                            </TouchableOpacity>
                                         </TouchableOpacity>
-                                    </View>
+                                    ))
+                                )}
+
+                                {canAdd && (
                                     <TouchableOpacity
-                                        onPress={() => handleDelete(fav.name)}
-                                        style={styles.deleteButton}
+                                        style={styles.addButton}
+                                        onPress={() => setIsAdding(true)}
                                     >
-                                        <Text style={styles.deleteIcon}>🗑️</Text>
+                                        <Text style={styles.addButtonIcon}>➕</Text>
+                                        <Text style={styles.addButtonText}>Añadir nuevo destino</Text>
                                     </TouchableOpacity>
-                                </TouchableOpacity>
-                            ))
+                                )}
+
+                                {!canAdd && !isPremium && (
+                                    <Text style={styles.limitNote}>
+                                        Has alcanzado el límite de 3 favoritos gratuitos.
+                                    </Text>
+                                )}
+                            </ScrollView>
                         )}
-                    </ScrollView>
+                    </KeyboardAvoidingView>
                 </View>
             </View>
         </Modal>
@@ -89,8 +130,11 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.white,
         borderTopLeftRadius: RADIUS.l,
         borderTopRightRadius: RADIUS.l,
-        height: '50%',
+        height: '75%', // Increased to handle search keyboard and list
         ...SHADOWS.default,
+    },
+    flexContent: {
+        flex: 1,
     },
     header: {
         flexDirection: 'row',
@@ -115,6 +159,16 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         padding: SPACING.m,
+    },
+    searchContainer: {
+        flex: 1,
+        padding: SPACING.m,
+    },
+    searchInstructions: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: SPACING.m,
+        textAlign: 'center',
     },
     favoriteItem: {
         flexDirection: 'row',
@@ -158,6 +212,35 @@ const styles = StyleSheet.create({
     },
     clickableArea: {
         flex: 1,
+    },
+    addButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: COLORS.white,
+        borderWidth: 1,
+        borderColor: COLORS.primary,
+        borderStyle: 'dashed',
+        borderRadius: RADIUS.m,
+        padding: SPACING.m,
+        marginTop: SPACING.l,
+        marginBottom: SPACING.xl,
+    },
+    addButtonIcon: {
+        fontSize: 16,
+        marginRight: 8,
+    },
+    addButtonText: {
+        color: COLORS.primary,
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    limitNote: {
+        textAlign: 'center',
+        color: '#999',
+        fontSize: 12,
+        marginTop: SPACING.m,
+        marginBottom: SPACING.xl,
     },
     emptyState: {
         alignItems: 'center',

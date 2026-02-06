@@ -21,7 +21,13 @@ const searchRewardedAd = RewardedAd.createForAdRequest(searchAdUnitId, {
     requestNonPersonalizedAdsOnly: true,
 });
 
-export const DestinationSearch = () => {
+export const DestinationSearch = ({
+    autoSave = false,
+    onSave
+}: {
+    autoSave?: boolean,
+    onSave?: () => void
+}) => {
     const {
         setDestination,
         destination,
@@ -29,7 +35,8 @@ export const DestinationSearch = () => {
         googleSearchCount,
         maxFreeGoogleSearches,
         incrementSearchCount,
-        unlockSearchWithAd
+        unlockSearchWithAd,
+        addFavorite
     } = useAppStore();
     const [isAdLoading, setIsAdLoading] = useState(false);
     const [adLoaded, setAdLoaded] = useState(false);
@@ -103,7 +110,18 @@ export const DestinationSearch = () => {
                 name: data.description,
                 location: { latitude: lat, longitude: lng },
             };
-            setDestination(newDestination);
+
+            if (autoSave) {
+                const success = addFavorite(newDestination);
+                if (success) {
+                    onSave?.();
+                } else {
+                    alert('Límite de favoritos alcanzado.');
+                }
+            } else {
+                setDestination(newDestination);
+            }
+
             incrementSearchCount();
         }
     };
