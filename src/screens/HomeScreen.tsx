@@ -75,7 +75,10 @@ export const HomeScreen = () => {
 
             <View style={styles.contentContainer}>
                 <MapDisplay />
-                <DestinationSearch />
+                {/* Solo mostrar buscador si NO tiene favoritos. Si tiene, debe usarlos. */}
+                {favorites.length === 0 && (
+                    <DestinationSearch />
+                )}
 
                 {/* Hamburger Menu */}
                 <HamburgerMenu

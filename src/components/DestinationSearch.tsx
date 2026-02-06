@@ -7,64 +7,142 @@ import { useAppStore } from '../store/useAppStore';
 
 import i18n from '../i18n';
 
+import { RewardedAd, RewardedAdEventType, TestIds, AdEventType } from 'react-native-google-mobile-ads';
+
 const GOOGLE_PLACES_API_KEY = Constants.expoConfig?.extra?.googlePlacesApiKey || '';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+// Search Rewarded Ad Unit ID
+const searchAdUnitId = __DEV__
+    ? TestIds.REWARDED
+    : 'ca-app-pub-5025716288565530/7360645497'; // Reusing existing or can be new
+
+const searchRewardedAd = RewardedAd.createForAdRequest(searchAdUnitId, {
+    requestNonPersonalizedAdsOnly: true,
+});
+
 export const DestinationSearch = () => {
-    const setDestination = useAppStore((state) => state.setDestination);
-    const destination = useAppStore((state) => state.destination);
-    const favorites = useAppStore((state) => state.favorites);
+    const {
+        setDestination,
+        destination,
+        isPremium,
+        googleSearchCount,
+        maxFreeGoogleSearches,
+        incrementSearchCount,
+        unlockSearchWithAd
+    } = useAppStore();
+    const [isAdLoading, setIsAdLoading] = useState(false);
+    const [adLoaded, setAdLoaded] = useState(false);
+
     const ref = useRef<GooglePlacesAutocompleteRef>(null);
     const [searchKey, setSearchKey] = React.useState(0);
+
+    const hasQuota = isPremium || googleSearchCount < maxFreeGoogleSearches;
+
+    // Ad Logic
+    useEffect(() => {
+        const unsubscribeLoaded = searchRewardedAd.addAdEventListener(RewardedAdEventType.LOADED, () => {
+            setAdLoaded(true);
+            setIsAdLoading(false);
+        });
+
+        const unsubscribeEarned = searchRewardedAd.addAdEventListener(
+            RewardedAdEventType.EARNED_REWARD,
+            reward => {
+                unlockSearchWithAd();
+                alert('¡Búsquedas de Google desbloqueadas!');
+            },
+        );
+
+        const unsubscribeClosed = searchRewardedAd.addAdEventListener(AdEventType.CLOSED, () => {
+            setAdLoaded(false);
+            searchRewardedAd.load();
+        });
+
+        const unsubscribeError = () => {
+            setIsAdLoading(false);
+            setAdLoaded(false);
+        };
+
+        searchRewardedAd.addAdEventListener(AdEventType.ERROR, unsubscribeError);
+
+        searchRewardedAd.load();
+
+        return () => {
+            unsubscribeLoaded();
+            unsubscribeEarned();
+            unsubscribeClosed();
+            searchRewardedAd.removeAllListeners();
+        };
+    }, []);
+
+    const handleUnlockSearch = () => {
+        if (adLoaded) {
+            searchRewardedAd.show();
+        } else {
+            setIsAdLoading(true);
+            searchRewardedAd.load();
+            alert('Cargando anuncio... Intenta de nuevo en un momento.');
+        }
+    };
 
     // Limpiar barra cuando se selecciona un destino
     useEffect(() => {
         if (destination) {
             const timer = setTimeout(() => {
-                // Forzamos el reinicio del componente para limpiar la lista visualmente
                 setSearchKey(prev => prev + 1);
             }, 500);
             return () => clearTimeout(timer);
         }
     }, [destination]);
 
+    const handlePressGoogle = (data: any, details: any = null) => {
+        if (details) {
+            const { lat, lng } = details.geometry.location;
+            const newDestination = {
+                name: data.description,
+                location: { latitude: lat, longitude: lng },
+            };
+            setDestination(newDestination);
+            incrementSearchCount();
+        }
+    };
+
     return (
         <View style={styles.container}>
-            <GooglePlacesAutocomplete
-                key={searchKey} // Clave para forzar re-render
-                placeholder={i18n.t('searchPlaceholder')}
-                onPress={(data, details = null) => {
-                    // Handle Google Places Results
-                    if (details) {
-                        const { lat, lng } = details.geometry.location;
-                        const newDestination = {
-                            name: data.description,
-                            location: { latitude: lat, longitude: lng },
-                        };
-                        setDestination(newDestination);
-                    } else {
-                        alert('Error: No details');
-                    }
-                }}
-                query={{
-                    key: GOOGLE_PLACES_API_KEY,
-                    language: 'es',
-                }}
-                fetchDetails={true}
-                enablePoweredByContainer={false}
-                styles={{
-                    container: {
-                        flex: 0,
-                        zIndex: 999,
-                    },
-                    textInput: styles.textInput,
-                    listView: styles.listView,
-                    row: styles.row,
-                    description: styles.description,
-                }}
-                ref={ref}
-                debounce={300}
-            />
+            {hasQuota ? (
+                <GooglePlacesAutocomplete
+                    key={searchKey}
+                    placeholder="Buscar destino para guardar..."
+                    onPress={handlePressGoogle}
+                    query={{
+                        key: GOOGLE_PLACES_API_KEY,
+                        language: 'es',
+                    }}
+                    fetchDetails={true}
+                    enablePoweredByContainer={false}
+                    styles={{
+                        container: { flex: 0, zIndex: 999 },
+                        textInput: styles.textInput,
+                        listView: styles.listView,
+                        row: styles.row,
+                        description: styles.description,
+                    }}
+                    ref={ref}
+                    debounce={300}
+                />
+            ) : (
+                <View style={{ zIndex: 999 }}>
+                    <TouchableOpacity
+                        style={[styles.quotaWarning, { height: 44, justifyContent: 'center' }]}
+                        onPress={handleUnlockSearch}
+                    >
+                        <Text style={styles.quotaText}>
+                            {isAdLoading ? 'Cargando Google Search...' : '⚠️ Cuota Google agotada. Ver video para desbloquear.'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            )}
         </View>
     );
 };
@@ -108,5 +186,19 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: COLORS.text,
         lineHeight: 22,
+    },
+    quotaWarning: {
+        backgroundColor: 'rgba(255, 149, 0, 0.1)',
+        padding: 6,
+        borderRadius: RADIUS.s,
+        marginTop: 4,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#FF9500',
+    },
+    quotaText: {
+        color: '#E67E22',
+        fontSize: 11,
+        fontWeight: 'bold',
     },
 });

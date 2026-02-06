@@ -21,6 +21,11 @@ export const useAppStore = create<AppState>()(
             isRewardAdWatched: false,
             favorites: [],
 
+            // Search Quota State
+            googleSearchCount: 0,
+            maxFreeGoogleSearches: 10,
+            isSearchAdWatched: false,
+
             setDestination: (destination) => set({ destination: destination ? { ...destination } : null }),
             setCurrentLocation: (location) => set({ currentLocation: location }),
             setAlertRadius: (radius) => set({ alertRadius: radius }),
@@ -126,7 +131,19 @@ export const useAppStore = create<AppState>()(
 
                 set({ favorites: state.favorites.filter(fav => fav.name !== name) });
                 return { success: true };
-            }
+            },
+
+            // Search Quota Actions
+            incrementSearchCount: () => {
+                const state = get();
+                if (!state.isPremium) {
+                    set({ googleSearchCount: state.googleSearchCount + 1 });
+                }
+            },
+            unlockSearchWithAd: () => set({
+                isSearchAdWatched: true,
+                googleSearchCount: 0 // Reset counter after ad
+            }),
         }),
         {
             name: 'proxialert-storage',
@@ -140,6 +157,7 @@ export const useAppStore = create<AppState>()(
                 dailyTripsCount: state.dailyTripsCount,
                 lastResetDate: state.lastResetDate,
                 favorites: state.favorites,
+                googleSearchCount: state.googleSearchCount,
             }),
         }
     )

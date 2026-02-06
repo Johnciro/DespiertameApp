@@ -247,7 +247,7 @@ export const InfoPanel = ({ onOpenPremium }: { onOpenPremium: () => void }) => {
                             {isTracking
                                 ? 'DETENER ALERTA'
                                 : !hasDestination
-                                    ? 'SELECCIONA UN DESTINO'
+                                    ? 'SELECCIONA DE FAVORITOS ⭐'
                                     : !isFav
                                         ? 'GUARDAR EN FAVORITOS'
                                         : needsToWatchAd

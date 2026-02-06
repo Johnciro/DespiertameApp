@@ -27,6 +27,11 @@ export interface AppState {
     isRewardAdWatched: boolean;
     favorites: Destination[];
 
+    // Search Quota
+    googleSearchCount: number;
+    maxFreeGoogleSearches: number;
+    isSearchAdWatched: boolean;
+
     setDestination: (destination: Destination | null) => void;
     setCurrentLocation: (location: LocationObject) => void;
     setAlertRadius: (radius: number) => void;
@@ -43,4 +48,8 @@ export interface AppState {
     // Favorites Actions
     addFavorite: (destination: Destination) => boolean;
     removeFavorite: (name: string) => { success: boolean; remainingDays?: number };
+
+    // Search Quota Actions
+    incrementSearchCount: () => void;
+    unlockSearchWithAd: () => void;
 }
