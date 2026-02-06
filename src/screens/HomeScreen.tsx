@@ -32,6 +32,8 @@ export const HomeScreen = () => {
     const {
         isConfirmingFavorite,
         setIsConfirmingFavorite,
+        isSearchingForFavorite,
+        setIsSearchingForFavorite,
         setDestination: storeSetDestination
     } = useAppStore();
 
@@ -109,8 +111,8 @@ export const HomeScreen = () => {
             <View style={styles.contentContainer}>
                 <MapDisplay />
 
-                {/* Solo mostrar buscador si NO tiene favoritos y NO está confirmando. */}
-                {favorites.length === 0 && !isConfirmingFavorite && (
+                {/* Mostrar buscador si NO tiene favoritos O si está añadiendo uno de forma manual */}
+                {(favorites.length === 0 || isSearchingForFavorite) && !isConfirmingFavorite && (
                     <DestinationSearch />
                 )}
 

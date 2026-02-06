@@ -27,6 +27,7 @@ export const useAppStore = create<AppState>()(
             isSearchAdWatched: false,
 
             isConfirmingFavorite: false,
+            isSearchingForFavorite: false,
 
             setDestination: (destination) => set({ destination: destination ? { ...destination } : null }),
             setCurrentLocation: (location) => set({ currentLocation: location }),
@@ -148,6 +149,7 @@ export const useAppStore = create<AppState>()(
             }),
 
             setIsConfirmingFavorite: (val) => set({ isConfirmingFavorite: val }),
+            setIsSearchingForFavorite: (val) => set({ isSearchingForFavorite: val }),
         }),
         {
             name: 'proxialert-storage',

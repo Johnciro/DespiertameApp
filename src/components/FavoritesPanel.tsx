@@ -16,7 +16,7 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({ visible, onClose
     const addFavorite = useAppStore((state) => state.addFavorite);
     const isPremium = useAppStore((state) => state.isPremium);
 
-    const [isAdding, setIsAdding] = useState(false);
+    const { isSearchingForFavorite, setIsSearchingForFavorite } = useAppStore();
 
     const maxFavs = isPremium ? 30 : 3;
     const canAdd = favorites.length < maxFavs;
@@ -26,6 +26,11 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({ visible, onClose
         if (!result.success) {
             alert(`No puedes eliminar este favorito aún. Falta(n) ${result.remainingDays} día(s) para poder cambiarlo.`);
         }
+    };
+
+    const handleStartAdd = () => {
+        setIsSearchingForFavorite(true);
+        onClose();
     };
 
     return (
@@ -38,12 +43,12 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({ visible, onClose
             <View style={styles.modalOverlay}>
                 <View style={styles.panelContainer}>
                     <View style={styles.header}>
-                        <Text style={styles.title}>{isAdding ? 'Añadir Favorito' : 'Mis Favoritos'}</Text>
+                        <Text style={styles.title}>Mis Favoritos</Text>
                         <TouchableOpacity
-                            onPress={() => isAdding ? setIsAdding(false) : onClose()}
+                            onPress={onClose}
                             style={styles.closeButton}
                         >
-                            <Text style={styles.closeButtonText}>{isAdding ? '←' : '✕'}</Text>
+                            <Text style={styles.closeButtonText}>✕</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -51,69 +56,56 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({ visible, onClose
                         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                         style={styles.flexContent}
                     >
-                        {isAdding ? (
-                            <View style={styles.searchContainer}>
-                                <Text style={styles.searchInstructions}>
-                                    Busca una dirección para guardarla en tu lista.
-                                </Text>
-                                <DestinationSearch
-                                    autoSave={true}
-                                    isEmbedded={true}
-                                    onSave={() => setIsAdding(false)}
-                                />
-                            </View>
-                        ) : (
-                            <ScrollView style={styles.content}>
-                                {favorites.length === 0 ? (
-                                    <View style={styles.emptyState}>
-                                        <Text style={styles.emptyText}>No tienes favoritos guardados.</Text>
-                                        <Text style={styles.emptySubtext}>Añade tus destinos frecuentes para viajar rápido.</Text>
-                                    </View>
-                                ) : (
-                                    favorites.map((fav, index) => (
-                                        <TouchableOpacity
-                                            key={index}
-                                            style={styles.favoriteItem}
-                                            onPress={() => onSelect(fav)}
-                                        >
-                                            <View style={styles.iconContainer}>
-                                                <Text style={styles.icon}>📍</Text>
-                                            </View>
-                                            <View style={styles.infoContainer}>
-                                                <View style={styles.clickableArea}>
-                                                    <Text style={styles.name}>{fav.name}</Text>
-                                                    <Text style={styles.coords}>
-                                                        {fav.location.latitude.toFixed(4)}, {fav.location.longitude.toFixed(4)}
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                            <TouchableOpacity
-                                                onPress={() => handleDelete(fav.name)}
-                                                style={styles.deleteButton}
-                                            >
-                                                <Text style={styles.deleteIcon}>🗑️</Text>
-                                            </TouchableOpacity>
-                                        </TouchableOpacity>
-                                    ))
-                                )}
-
-                                {canAdd && (
+                        <ScrollView style={styles.content}>
+                            {favorites.length === 0 ? (
+                                <View style={styles.emptyState}>
+                                    <Text style={styles.emptyText}>No tienes favoritos guardados.</Text>
+                                    <Text style={styles.emptySubtext}>Añade tus destinos frecuentes para viajar rápido.</Text>
+                                </View>
+                            ) : (
+                                favorites.map((fav, index) => (
                                     <TouchableOpacity
-                                        style={styles.addButton}
-                                        onPress={() => setIsAdding(true)}
+                                        key={index}
+                                        style={styles.favoriteItem}
+                                        onPress={() => onSelect(fav)}
                                     >
-                                        <Text style={styles.addButtonIcon}>➕</Text>
-                                        <Text style={styles.addButtonText}>Añadir nuevo destino</Text>
+                                        <View style={styles.iconContainer}>
+                                            <Text style={styles.icon}>📍</Text>
+                                        </View>
+                                        <View style={styles.infoContainer}>
+                                            <View style={styles.clickableArea}>
+                                                <Text style={styles.name}>{fav.name}</Text>
+                                                <Text style={styles.coords}>
+                                                    {fav.location.latitude.toFixed(4)}, {fav.location.longitude.toFixed(4)}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                        <TouchableOpacity
+                                            onPress={() => handleDelete(fav.name)}
+                                            style={styles.deleteButton}
+                                        >
+                                            <Text style={styles.deleteIcon}>🗑️</Text>
+                                        </TouchableOpacity>
                                     </TouchableOpacity>
-                                )}
+                                ))
+                            )}
 
-                                {!canAdd && !isPremium && (
-                                    <Text style={styles.limitNote}>
-                                        Has alcanzado el límite de 3 favoritos gratuitos.
-                                    </Text>
-                                )}
-                            </ScrollView>
-                        )}
+                            {canAdd && (
+                                <TouchableOpacity
+                                    style={styles.addButton}
+                                    onPress={handleStartAdd}
+                                >
+                                    <Text style={styles.addButtonIcon}>➕</Text>
+                                    <Text style={styles.addButtonText}>Añadir nuevo destino</Text>
+                                </TouchableOpacity>
+                            )}
+
+                            {!canAdd && !isPremium && (
+                                <Text style={styles.limitNote}>
+                                    Has alcanzado el límite de 3 favoritos gratuitos.
+                                </Text>
+                            )}
+                        </ScrollView>
                     </KeyboardAvoidingView>
                 </View>
             </View>

@@ -33,6 +33,7 @@ export interface AppState {
     isSearchAdWatched: boolean;
 
     isConfirmingFavorite: boolean;
+    isSearchingForFavorite: boolean;
 
     setDestination: (destination: Destination | null) => void;
     setCurrentLocation: (location: LocationObject) => void;
@@ -56,4 +57,5 @@ export interface AppState {
     unlockSearchWithAd: () => void;
 
     setIsConfirmingFavorite: (val: boolean) => void;
+    setIsSearchingForFavorite: (val: boolean) => void;
 }

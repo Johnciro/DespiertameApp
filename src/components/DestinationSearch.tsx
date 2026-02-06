@@ -39,7 +39,9 @@ export const DestinationSearch = ({
         incrementSearchCount,
         unlockSearchWithAd,
         addFavorite,
-        setIsConfirmingFavorite
+        setIsConfirmingFavorite,
+        isSearchingForFavorite,
+        setIsSearchingForFavorite
     } = useAppStore();
     const [isAdLoading, setIsAdLoading] = useState(false);
     const [adLoaded, setAdLoaded] = useState(false);
@@ -114,11 +116,12 @@ export const DestinationSearch = ({
                 location: { latitude: lat, longitude: lng },
             };
 
-            if (autoSave) {
+            if (autoSave || isSearchingForFavorite) {
                 // Mover mapa y pedir confirmación
                 setDestination(newDestination);
                 setIsConfirmingFavorite(true);
-                onSave?.(); // Notifica al padre (cierra panel)
+                setIsSearchingForFavorite(false); // Ya seleccionó, cerramos buscador
+                onSave?.(); // Notifica al padre si es necesario
             } else {
                 setDestination(newDestination);
             }
