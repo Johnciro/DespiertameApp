@@ -141,6 +141,7 @@ export const DestinationSearch = ({
                         key: GOOGLE_PLACES_API_KEY,
                         language: 'es',
                     }}
+                    onFail={(error) => console.error('GooglePlacesAutocomplete Error:', error)}
                     fetchDetails={true}
                     enablePoweredByContainer={false}
                     styles={{
